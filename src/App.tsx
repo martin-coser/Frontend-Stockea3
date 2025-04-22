@@ -26,7 +26,7 @@ function App() {
         </Routes>
       </div>
       <div className="h-screen bg-gray-100 flex justify-center items-center">
-      <h1 className="text-4xl text-red-500 font-bold">¡Hola Tailwind!</h1>
+      <h1 className="text-4xl text-red-900 font-bold">¡Hola Tailwind!</h1>
       </div>
     </Router>
   );
