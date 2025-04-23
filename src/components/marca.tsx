@@ -35,7 +35,7 @@ const Marca: React.FC = () => {
       obtenerMarcas(); 
     } catch (error) {
       console.error('Error al registrar la marca:', error);
-      setMensaje('Error al registrar la marca.');
+      setMensaje('Error al registrar la marca.',);
     }
   };
 
