@@ -43,8 +43,7 @@ const Marca: React.FC = () => {
     <div className="flex min-h-screen">
       {/* Formulario para nueva marca */}
       <div className="w-1/3 p-8">
-        <h2 className="font-bold text-center">Marca</h2>
-        <h3 className="">Nueva Marca</h3>
+        <h2 className="font-bold text-center">Nueva Marca</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -71,7 +70,7 @@ const Marca: React.FC = () => {
 
       {/* Listado de Marcas existentes */}
       <div className="w-2/3 p-8">
-        <h3 className="font-bold mb-4">Listado de Marcas</h3>
+        <h3 className="font-bold mb-4 text-center">Listado de Marcas</h3>
         <table className="w-full">
           <thead>
             <tr>

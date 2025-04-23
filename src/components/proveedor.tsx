@@ -47,8 +47,7 @@ const Proveedor: React.FC = () => {
     <div className="flex min-h-screen">
       {/* Formulario para nuevo proveedor */}
       <div className="w-1/3 p-8">
-        <h2 className="font-bold text-center">Proveedor</h2>
-        <h3 className="">Nuevo Proveedor</h3>
+        <h2 className="font-bold text-center">Nuevo Proveedor</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -89,7 +88,7 @@ const Proveedor: React.FC = () => {
 
       {/* Listado de Proveedores existentes */}
       <div className="w-2/3 p-8">
-        <h3 className="font-bold mb-4">Listado de Proveedores</h3>
+        <h3 className="font-bold mb-4 text-center">Listado de Proveedores</h3>
         <table className="w-full">
           <thead>
             <tr>

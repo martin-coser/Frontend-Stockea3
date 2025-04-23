@@ -45,8 +45,7 @@ const Categoria: React.FC = () => {
     <div className="flex min-h-screen">
       {/* Formulario para nueva categoria */}
       <div className="w-1/3 p-8">
-        <h2 className="font-bold text-center">Categoria</h2>
-        <h3 className="">Nueva Categoría</h3>
+        <h2 className="font-bold text-center">Nueva Categoria</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -80,7 +79,7 @@ const Categoria: React.FC = () => {
 
       {/* Listado de Categorias existentes */}
       <div className="w-2/3 p-8">
-        <h3 className="font-bold mb-4">Listado de Categorias</h3>
+        <h3 className="font-bold mb-4 text-center">Listado de Categorias</h3>
         <table className="w-full">
           <thead>
             <tr>
