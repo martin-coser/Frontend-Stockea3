@@ -5,7 +5,8 @@ import { Menu } from 'lucide-react';
 import Marca from './components/marca'
 import Proveedor from './components/proveedor'
 /* import Movimiento from './components/movimiento'
-import Producto from './components/producto' */
+import Producto from './components/producto'
+import Lote from './components/lote' */
 import Categoria from './components/categoria'
 
 function App() {
@@ -32,10 +33,12 @@ function App() {
               <ul className="hidden md:flex gap-6 text-gray-700 font-medium">
               <li className="cursor-pointer hover:text-blue-600"><Link to="/">Inicio</Link></li>
                 <li className="cursor-pointer hover:text-blue-600"><Link to="/marca">Marcas</Link></li>
+                <li className="cursor-pointer hover:text-blue-600"><Link to="/categoria">Categorias</Link></li>
                 <li className="cursor-pointer hover:text-blue-600"><Link to="/proveedor">Proveedores</Link></li>
                 <li className="cursor-pointer hover:text-blue-600"><Link to="/producto">Productos</Link></li>
                 <li className="cursor-pointer hover:text-blue-600"><Link to="/movimiento">Movimientos</Link></li>
-                <li className="cursor-pointer hover:text-blue-600"><Link to="/categoria">Categorias</Link></li>
+                <li className="cursor-pointer hover:text-blue-600"><Link to="/lote">Lotes</Link></li>
+                
               </ul>
             </div>
 
@@ -47,7 +50,8 @@ function App() {
           <Route path="/marca" element={<Marca />} />
           <Route path="/proveedor" element={<Proveedor />} />
           {/* <Route path="/producto" element={<Producto />} />
-          <Route path="/movimiento" element={<Movimiento />} /> */}
+          <Route path="/movimiento" element={<Movimiento />} />
+          <Route path="/lote" element={<Lote />} /> */}
           <Route path="/categoria" element={<Categoria />} />
         </Routes>
       </div>

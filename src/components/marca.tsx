@@ -35,7 +35,7 @@ const Marca: React.FC = () => {
       obtenerMarcas(); 
     } catch (error) {
       console.error('Error al registrar la marca:', error);
-      setMensaje('Error al registrar la marca.');
+      setMensaje('Error al registrar la marca.',);
     }
   };
 
@@ -43,8 +43,7 @@ const Marca: React.FC = () => {
     <div className="flex min-h-screen">
       {/* Formulario para nueva marca */}
       <div className="w-1/3 p-8">
-        <h2 className="font-bold text-center">Marca</h2>
-        <h3 className="">Nueva Marca</h3>
+        <h2 className="font-bold text-center">Nueva Marca</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -71,14 +70,25 @@ const Marca: React.FC = () => {
 
       {/* Listado de Marcas existentes */}
       <div className="w-2/3 p-8">
-        <h3 className="font-bold mb-4">Listado de Marcas</h3>
-        <ul className="space-y-2">
-          {marcas.map((marca: any) => (
-            <li key={marca.id} className="p-2 border-b border-gray-200">
-              {marca.nombre} - {marca.descripcion}
-            </li>
-          ))}
-        </ul>
+        <h3 className="font-bold mb-4 text-center">Listado de Marcas</h3>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left">Nombre</th>
+              <th className="px-4 py-2 text-left">Descripción</th>
+              <th className="px-4 py-2 text-left">Modificar</th>
+              <th className="px-4 py-2 text-left">Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {marcas.map((marca: any) => (
+              <tr key={marca.id}>
+                <td className="px-4 py-2">{marca.nombre}</td>
+                <td className="px-4 py-2">{marca.descripcion}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
