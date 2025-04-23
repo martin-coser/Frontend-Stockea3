@@ -29,8 +29,8 @@ const Categoria: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(API_URL, { nombre, descripcion });
-      setMensaje('Marca registrada con éxito.');
+      await axios.post(API_URL, { nombre, descripcion, imagen });
+      setMensaje('Categoria registrada con éxito.');
       setNombre('');
       setDescripcion('');
       setImagen('');
