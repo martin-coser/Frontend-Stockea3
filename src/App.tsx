@@ -1,39 +1,62 @@
-import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import RegistrarMarca from './components/registrar-marca'; 
+import React, { useState } from 'react';
+import { Menu } from 'lucide-react';
+import Marca from './components/marca'
+/* import Proveedor from './components/proveedor'
+import Movimiento from './components/movimiento'
+import Producto from './components/producto' */
+import Categoria from './components/categoria'
 
 function App() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
   return (
     <Router>
       <div className="App">
         <header className="App-header">
-          <nav>
-            <ul>
-              <li>
-                <Link to="/">Inicio</Link>
-              </li>
-              <li>
-                <Link to="/Marcas/nuevaMarca">Registrar Marcasaaa</Link>
-              </li>
-            </ul>
+          <nav className="bg-white shadow-md p-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <h1 className="text-xl font-semibold text-gray-800">Stockea3</h1>
+
+              <button
+                onClick={toggleMenu}
+                className="text-gray-800 md:hidden"
+                aria-label="Abrir menú"
+              >
+                <Menu size={28} />
+              </button>
+
+              <ul className="hidden md:flex gap-6 text-gray-700 font-medium">
+              <li className="cursor-pointer hover:text-blue-600"><Link to="/">Inicio</Link></li>
+                <li className="cursor-pointer hover:text-blue-600"><Link to="/marca">Marcas</Link></li>
+                <li className="cursor-pointer hover:text-blue-600"><Link to="/proveedor">Proveedores</Link></li>
+                <li className="cursor-pointer hover:text-blue-600"><Link to="/producto">Productos</Link></li>
+                <li className="cursor-pointer hover:text-blue-600"><Link to="/movimiento">Movimientos</Link></li>
+                <li className="cursor-pointer hover:text-blue-600"><Link to="/categoria">Categorias</Link></li>
+              </ul>
+            </div>
+
           </nav>
-          
         </header>
-        <Routes>
-          <Route path="/" element={<Inicio />} /> {}
-          <Route path="/Marcas/nuevaMarca" element={<RegistrarMarca/>} />
+
+    <Routes>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/marca" element={<Marca />} />
+          {/* <Route path="/proveedor" element={<Proveedor />} />
+          <Route path="/producto" element={<Producto />} />
+          <Route path="/movimiento" element={<Movimiento />} /> */}
+          <Route path="/categoria" element={<Categoria />} />
         </Routes>
-      </div>
-      <div className="h-screen bg-gray-100 flex justify-center items-center">
-      <h1 className="text-4xl text-red-900 font-bold">¡Hola Tailwind!</h1>
       </div>
     </Router>
   );
 }
 
 const Inicio = () => (
-  <p>Hola</p>
+  <p>Hacer Pagina Principal El Diablo</p>
 );
 
 export default App;
