@@ -45,7 +45,7 @@ const Categoria: React.FC = () => {
     <div className="flex min-h-screen">
       {/* Formulario para nueva categoria */}
       <div className="w-1/3 p-8">
-        <h2 className="font-bold text-center">Marca</h2>
+        <h2 className="font-bold text-center">Categoria</h2>
         <h3 className="">Nueva Categoría</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input

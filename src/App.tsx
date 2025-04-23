@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
 import Marca from './components/marca'
-/* import Proveedor from './components/proveedor'
-import Movimiento from './components/movimiento'
+import Proveedor from './components/proveedor'
+/* import Movimiento from './components/movimiento'
 import Producto from './components/producto' */
 import Categoria from './components/categoria'
 
@@ -45,8 +45,8 @@ function App() {
     <Routes>
           <Route path="/" element={<Inicio />} />
           <Route path="/marca" element={<Marca />} />
-          {/* <Route path="/proveedor" element={<Proveedor />} />
-          <Route path="/producto" element={<Producto />} />
+          <Route path="/proveedor" element={<Proveedor />} />
+          {/* <Route path="/producto" element={<Producto />} />
           <Route path="/movimiento" element={<Movimiento />} /> */}
           <Route path="/categoria" element={<Categoria />} />
         </Routes>
