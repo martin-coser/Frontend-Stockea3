@@ -90,13 +90,28 @@ const Proveedor: React.FC = () => {
       {/* Listado de Proveedores existentes */}
       <div className="w-2/3 p-8">
         <h3 className="font-bold mb-4">Listado de Proveedores</h3>
-        <ul className="space-y-2">
-          {proveedores.map((proveedor: any) => (
-            <li key={proveedor.id} className="p-2 border-b border-gray-200">
-              {proveedor.nombre} - {proveedor.descripcion} - {proveedor.imagen} - {proveedor.cuit}
-            </li>
-          ))}
-        </ul>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left">Nombre</th>
+              <th className="px-4 py-2 text-left">Codigo</th>
+              <th className="px-4 py-2 text-left">Telefono</th>
+              <th className="px-4 py-2 text-left">Cuit</th>
+              <th className="px-4 py-2 text-left">Modificar</th>
+              <th className="px-4 py-2 text-left">Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {proveedores.map((proveedor: any) => (
+              <tr key={proveedor.id}>
+                <td className="px-4 py-2">{proveedor.nombre}</td>
+                <td className="px-4 py-2">{proveedor.codigo}</td>
+                <td className="px-4 py-2">{proveedor.telefono}</td>
+                <td className="px-4 py-2">{proveedor.cuit}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

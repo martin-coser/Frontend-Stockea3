@@ -80,14 +80,27 @@ const Categoria: React.FC = () => {
 
       {/* Listado de Categorias existentes */}
       <div className="w-2/3 p-8">
-        <h3 className="font-bold mb-4">Listado de Categorías</h3>
-        <ul className="space-y-2">
-          {categorias.map((categoria: any) => (
-            <li key={categoria.id} className="p-2 border-b border-gray-200">
-              {categoria.nombre} - {categoria.descripcion} - {categoria.imagen}
-            </li>
-          ))}
-        </ul>
+        <h3 className="font-bold mb-4">Listado de Categorias</h3>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left">Nombre</th>
+              <th className="px-4 py-2 text-left">Descripción</th>
+              <th className="px-4 py-2 text-left">Imagen</th>
+              <th className="px-4 py-2 text-left">Modificar</th>
+              <th className="px-4 py-2 text-left">Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categorias.map((categoria: any) => (
+              <tr key={categoria.id}>
+                <td className="px-4 py-2">{categoria.nombre}</td>
+                <td className="px-4 py-2">{categoria.descripcion}</td>
+                <td className="px-4 py-2">{categoria.imagen}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

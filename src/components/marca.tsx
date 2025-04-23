@@ -72,13 +72,24 @@ const Marca: React.FC = () => {
       {/* Listado de Marcas existentes */}
       <div className="w-2/3 p-8">
         <h3 className="font-bold mb-4">Listado de Marcas</h3>
-        <ul className="space-y-2">
-          {marcas.map((marca: any) => (
-            <li key={marca.id} className="p-2 border-b border-gray-200">
-              {marca.nombre} - {marca.descripcion}
-            </li>
-          ))}
-        </ul>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 text-left">Nombre</th>
+              <th className="px-4 py-2 text-left">Descripción</th>
+              <th className="px-4 py-2 text-left">Modificar</th>
+              <th className="px-4 py-2 text-left">Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {marcas.map((marca: any) => (
+              <tr key={marca.id}>
+                <td className="px-4 py-2">{marca.nombre}</td>
+                <td className="px-4 py-2">{marca.descripcion}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
