@@ -1,5 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 const API_URL = 'http://localhost:4000/categoria';
 
@@ -9,16 +11,38 @@ const Categoria: React.FC = () => {
   const [imagen, setImagen] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [categorias, setCategorias] = useState([]);
+  const [todasLasCategorias, setTodasLasCategorias] = useState([]); // Nuevo estado
+  const [filtroNombre, setFiltroNombre] = useState('');
 
-  // Traer categorias desde el backend
+
+  // Traer todas las marcas
   const obtenerCategorias = async () => {
     try {
       const res = await axios.get(API_URL);
       setCategorias(res.data);
+      setTodasLasCategorias(res.data); // Guardamos todas
     } catch (error) {
-      console.error('Error al obtener las categorias:', error);
+      console.error('Error al obtener las marcas:', error);
     }
   };
+
+  // Filtrar categorias por nombre
+  const filtrarCategorias = (nombreFiltro: string) => {
+    const resultado = todasLasCategorias.filter((categoria: any) =>
+      categoria.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())
+    );
+    setCategorias(resultado);
+  };
+
+  // Al cambiar el filtro de nombre
+  useEffect(() => {
+    if (filtroNombre.trim() === '') {
+      setCategorias(todasLasCategorias); // Mostrar todas si no hay filtro
+    } else {
+      filtrarCategorias(filtroNombre);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtroNombre, todasLasCategorias]);
 
   // Ejecutar al montar el componente
   useEffect(() => {
@@ -41,7 +65,7 @@ const Categoria: React.FC = () => {
     }
   };
 
-  return (
+return (
     <div className="flex min-h-screen">
       {/* Formulario para nueva categoria */}
       <div className="w-1/3 p-8">
@@ -70,32 +94,47 @@ const Categoria: React.FC = () => {
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-800"
-          >Registrar</button>
-
+            className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition"
+          >
+            Registrar
+          </button>
           {mensaje && <p className="text-green-600">{mensaje}</p>}
         </form>
       </div>
 
-      {/* Listado de Categorias existentes */}
+      {/* Listado de categorias con filtro */}
       <div className="w-2/3 p-8">
         <h3 className="font-bold mb-4 text-center">Listado de Categorias</h3>
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Descripción</th>
-              <th className="px-4 py-2 text-left">Imagen</th>
-              <th className="px-4 py-2 text-left">Modificar</th>
-              <th className="px-4 py-2 text-left">Eliminar</th>
-            </tr>
-          </thead>
+
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Filtrar por nombre..."
+            value={filtroNombre}
+            onChange={(e) => setFiltroNombre(e.target.value)}
+            className="w-1/2 p-1.5 border border-gray-300 rounded"
+          />
+        </div>
+
+        <table className="w-full table-auto border-separate border-spacing-0">
+        <thead>
+        <tr className="bg-green-100">
+          <th className="px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+          <th className="px-4 py-2 text-left text-sm font-semibold">Descripción</th>
+          <th className="px-4 py-2 text-left text-sm font-semibold">Imagen</th>
+          <th className="px-4 py-2 text-left text-sm font-semibold">Modificar</th>
+          <th className="px-4 py-2 text-left text-sm font-semibold">Eliminar</th>
+        </tr>
+      </thead>
+
           <tbody>
-            {categorias.map((categoria: any) => (
-              <tr key={categoria.id}>
-                <td className="px-4 py-2">{categoria.nombre}</td>
-                <td className="px-4 py-2">{categoria.descripcion}</td>
-                <td className="px-4 py-2">{categoria.imagen}</td>
+            {categorias.map((marca: any) => (
+              <tr key={marca.id} className="hover:bg-green-50">
+                <td className="px-4 py-2">{marca.nombre}</td>
+                <td className="px-4 py-2">{marca.descripcion}</td>
+                <td className="px-4 py-2">{marca.imagen}</td>
+                <td className="px-4 py-2 text-blue-600 cursor-pointer"><PencilSquareIcon className=" h-5 w-5 text-blue-600 ml-6" /></td>
+                <td className="px-4 py-2 text-red-600 cursor-pointer"><TrashIcon className="h-5 w-5 text-red-600 ml-5"/></td>
               </tr>
             ))}
           </tbody>

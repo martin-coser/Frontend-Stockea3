@@ -1,5 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 const API_URL = 'http://localhost:4000/marca';
 
@@ -8,18 +10,39 @@ const Marca: React.FC = () => {
   const [descripcion, setDescripcion] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [marcas, setMarcas] = useState([]);
+  const [todasLasMarcas, setTodasLasMarcas] = useState([]); // Nuevo estado
+  const [filtroNombre, setFiltroNombre] = useState('');
 
-  // Traer marcas desde el backend
+  // Traer todas las marcas
   const obtenerMarcas = async () => {
     try {
       const res = await axios.get(API_URL);
       setMarcas(res.data);
+      setTodasLasMarcas(res.data); // Guardamos todas
     } catch (error) {
       console.error('Error al obtener las marcas:', error);
     }
   };
 
-  // Ejecutar al montar el componente
+  // Filtrar marcas por nombre (solo en frontend)
+  const filtrarMarcas = (nombreFiltro: string) => {
+    const resultado = todasLasMarcas.filter((marca: any) =>
+      marca.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())
+    );
+    setMarcas(resultado);
+  };
+
+  // Al cambiar el filtro de nombre
+  useEffect(() => {
+    if (filtroNombre.trim() === '') {
+      setMarcas(todasLasMarcas); // Mostrar todas si no hay filtro
+    } else {
+      filtrarMarcas(filtroNombre);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtroNombre, todasLasMarcas]);
+
+  // Al montar componente
   useEffect(() => {
     obtenerMarcas();
   }, []);
@@ -32,10 +55,10 @@ const Marca: React.FC = () => {
       setMensaje('Marca registrada con éxito.');
       setNombre('');
       setDescripcion('');
-      obtenerMarcas(); 
+      obtenerMarcas();
     } catch (error) {
       console.error('Error al registrar la marca:', error);
-      setMensaje('Error al registrar la marca.',);
+      setMensaje('Error al registrar la marca.');
     }
   };
 
@@ -61,36 +84,55 @@ const Marca: React.FC = () => {
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-800"
-          >Registrar</button>
+            className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition"
+          >
+            Registrar
+          </button>
 
           {mensaje && <p className="text-green-600">{mensaje}</p>}
         </form>
       </div>
 
-      {/* Listado de Marcas existentes */}
+      {/* Listado de marcas con filtro */}
       <div className="w-2/3 p-8">
         <h3 className="font-bold mb-4 text-center">Listado de Marcas</h3>
-        <table className="w-full">
+
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Filtrar por nombre..."
+            value={filtroNombre}
+            onChange={(e) => setFiltroNombre(e.target.value)}
+            className="w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 transition"
+          />
+        </div>
+
+        <table className="w-full table-auto border-separate border-spacing-0">
           <thead>
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Descripción</th>
-              <th className="px-4 py-2 text-left">Modificar</th>
-              <th className="px-4 py-2 text-left">Eliminar</th>
+            <tr className="bg-green-100">
+              <th className="px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Descripción</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Modificar</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Eliminar</th>
             </tr>
           </thead>
           <tbody>
             {marcas.map((marca: any) => (
-              <tr key={marca.id}>
-                <td className="px-4 py-2">{marca.nombre}</td>
-                <td className="px-4 py-2">{marca.descripcion}</td>
+              <tr key={marca.id} className="hover:bg-green-50">
+                <td className="px-4 py-2 text-sm">{marca.nombre}</td>
+                <td className="px-4 py-2 text-sm">{marca.descripcion}</td>
+                <td className="px-4 py-2 text-blue-600 cursor-pointer hover:text-green-700">
+                  <PencilSquareIcon className="h-5 w-5" />
+                </td>
+                <td className="px-4 py-2 text-red-600 cursor-pointer hover:text-red-700">
+                  <TrashIcon className="h-5 w-5" />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </div> 
   );
 };
 
