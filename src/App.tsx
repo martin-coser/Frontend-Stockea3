@@ -5,8 +5,8 @@ import { Menu } from 'lucide-react';
 import Marca from './components/marca'
 import Proveedor from './components/proveedor'
 /* import Movimiento from './components/movimiento'
-import Producto from './components/producto'
 import Lote from './components/lote' */
+import Producto from './components/producto'
 import Categoria from './components/categoria'
 
 function App() {
@@ -49,8 +49,8 @@ function App() {
           <Route path="/" element={<Inicio />} />
           <Route path="/marca" element={<Marca />} />
           <Route path="/proveedor" element={<Proveedor />} />
-          {/* <Route path="/producto" element={<Producto />} />
-          <Route path="/movimiento" element={<Movimiento />} />
+          <Route path="/producto" element={<Producto />} />
+          {/* <Route path="/movimiento" element={<Movimiento />} />
           <Route path="/lote" element={<Lote />} /> */}
           <Route path="/categoria" element={<Categoria />} />
         </Routes>
