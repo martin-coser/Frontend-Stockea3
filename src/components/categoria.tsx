@@ -94,7 +94,7 @@ return (
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-800"
+            className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition"
           >
             Registrar
           </button>
@@ -116,19 +116,20 @@ return (
           />
         </div>
 
-        <table className="w-full table-fixed">
-          <thead>
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Descripción</th>
-              <th className="px-4 py-2 text-left">Imagen</th>
-              <th className="px-4 py-2 text-left">Modificar</th>
-              <th className="px-4 py-2 text-left">Eliminar</th>
-            </tr>
-          </thead>
+        <table className="w-full table-auto border-separate border-spacing-0">
+        <thead>
+        <tr className="bg-green-100">
+          <th className="px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+          <th className="px-4 py-2 text-left text-sm font-semibold">Descripción</th>
+          <th className="px-4 py-2 text-left text-sm font-semibold">Imagen</th>
+          <th className="px-4 py-2 text-left text-sm font-semibold">Modificar</th>
+          <th className="px-4 py-2 text-left text-sm font-semibold">Eliminar</th>
+        </tr>
+      </thead>
+
           <tbody>
             {categorias.map((marca: any) => (
-              <tr key={marca.id}>
+              <tr key={marca.id} className="hover:bg-green-50">
                 <td className="px-4 py-2">{marca.nombre}</td>
                 <td className="px-4 py-2">{marca.descripcion}</td>
                 <td className="px-4 py-2">{marca.imagen}</td>
