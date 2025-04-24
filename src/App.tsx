@@ -8,6 +8,7 @@ import Proveedor from './components/proveedor'
 import Producto from './components/producto'
 import Lote from './components/lote' */
 import Categoria from './components/categoria'
+import Home from './components/home'; 
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -59,8 +60,7 @@ function App() {
   );
 }
 
-const Inicio = () => (
-  <p>Hacer Pagina Principal El Diablo</p>
-);
+
+const Inicio = () => <Home />; 
 
 export default App;
