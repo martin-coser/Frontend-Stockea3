@@ -8,6 +8,7 @@ import Movimiento from './components/movimiento'
 /* import Lote from './components/lote' */
 import Producto from './components/producto'
 import Categoria from './components/categoria'
+import Home from './components/home'; 
 
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -59,8 +60,7 @@ function App() {
   );
 }
 
-const Inicio = () => (
-  <p>Hacer Pagina Principal El Diablo</p>
-);
+
+const Inicio = () => <Home />; 
 
 export default App;
