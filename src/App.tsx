@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
 import Marca from './components/marca'
 import Proveedor from './components/proveedor'
-/* import Movimiento from './components/movimiento'
-import Lote from './components/lote' */
+import Movimiento from './components/movimiento'
+/* import Lote from './components/lote' */
 import Producto from './components/producto'
 import Categoria from './components/categoria'
 
@@ -50,8 +50,8 @@ function App() {
           <Route path="/marca" element={<Marca />} />
           <Route path="/proveedor" element={<Proveedor />} />
           <Route path="/producto" element={<Producto />} />
-          {/* <Route path="/movimiento" element={<Movimiento />} />
-          <Route path="/lote" element={<Lote />} /> */}
+          <Route path="/movimiento" element={<Movimiento />} />
+          {/* <Route path="/lote" element={<Lote />} /> */}
           <Route path="/categoria" element={<Categoria />} />
         </Routes>
       </div>

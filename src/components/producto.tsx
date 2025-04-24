@@ -118,14 +118,14 @@ const Producto: React.FC = () => {
       {/* Listado de Productos existentes */}
       <div className="w-2/3 p-8">
         <h3 className="font-bold mb-4 text-center">Listado de Productos</h3>
-        <table className="w-full">
+        <table className="w-full table-fixed">
           <thead>
             <tr>
               <th className="px-4 py-2 text-left">Nombre</th>
               <th className="px-4 py-2 text-left">Codigo</th>
               <th className="px-4 py-2 text-left">Descripcion</th>
-              <th className="px-4 py-2 text-left">PrecioIngreso</th>
-              <th className="px-4 py-2 text-left">PrecioEgreso</th>
+              <th className="px-4 py-2 text-left">PIngreso</th>
+              <th className="px-4 py-2 text-left">PEgreso</th>
               <th className="px-4 py-2 text-left">Marca</th>
               <th className="px-4 py-2 text-left">Categoria</th>
               <th className="px-4 py-2 text-left">Modificar</th>
