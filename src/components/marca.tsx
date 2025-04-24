@@ -3,7 +3,6 @@ import axios from 'axios';
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
-
 const API_URL = 'http://localhost:4000/marca';
 
 const Marca: React.FC = () => {
@@ -85,10 +84,11 @@ const Marca: React.FC = () => {
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-800"
+            className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition"
           >
             Registrar
           </button>
+
           {mensaje && <p className="text-green-600">{mensaje}</p>}
         </form>
       </div>
@@ -103,32 +103,36 @@ const Marca: React.FC = () => {
             placeholder="Filtrar por nombre..."
             value={filtroNombre}
             onChange={(e) => setFiltroNombre(e.target.value)}
-            className="w-1/2 p-1.5 border border-gray-300 rounded"
+            className="w-1/2 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 transition"
           />
         </div>
 
-        <table className="w-full table-fixed">
+        <table className="w-full table-auto border-separate border-spacing-0">
           <thead>
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Descripción</th>
-              <th className="px-4 py-2 text-left">Modificar</th>
-              <th className="px-4 py-2 text-left">Eliminar</th>
+            <tr className="bg-green-100">
+              <th className="px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Descripción</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Modificar</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Eliminar</th>
             </tr>
           </thead>
           <tbody>
             {marcas.map((marca: any) => (
-              <tr key={marca.id}>
-                <td className="px-4 py-2">{marca.nombre}</td>
-                <td className="px-4 py-2">{marca.descripcion}</td>
-                <td className="px-4 py-2 text-blue-600 cursor-pointer"><PencilSquareIcon className=" h-5 w-5 text-blue-600 ml-6" /></td>
-                <td className="px-4 py-2 text-red-600 cursor-pointer"><TrashIcon className="h-5 w-5 text-red-600 ml-5"/></td>
+              <tr key={marca.id} className="hover:bg-green-50">
+                <td className="px-4 py-2 text-sm">{marca.nombre}</td>
+                <td className="px-4 py-2 text-sm">{marca.descripcion}</td>
+                <td className="px-4 py-2 text-blue-600 cursor-pointer hover:text-green-700">
+                  <PencilSquareIcon className="h-5 w-5" />
+                </td>
+                <td className="px-4 py-2 text-red-600 cursor-pointer hover:text-red-700">
+                  <TrashIcon className="h-5 w-5" />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </div> 
   );
 };
 
