@@ -81,9 +81,10 @@ const Proveedor: React.FC = () => {
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-800"
-          >Registrar</button>
-
+            className="w-full py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition"
+          >
+            Registrar
+          </button>
           {mensaje && <p className="text-green-600">{mensaje}</p>}
         </form>
       </div>
@@ -93,13 +94,13 @@ const Proveedor: React.FC = () => {
         <h3 className="font-bold mb-4 text-center">Listado de Proveedores</h3>
         <table className="w-full">
           <thead>
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Codigo</th>
-              <th className="px-4 py-2 text-left">Telefono</th>
-              <th className="px-4 py-2 text-left">Cuit</th>
-              <th className="px-4 py-2 text-left">Modificar</th>
-              <th className="px-4 py-2 text-left">Eliminar</th>
+            <tr className="bg-green-100">
+              <th className="px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Codigo</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Telefono</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Cuit</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Modificar</th>
+              <th className="px-4 py-2 text-left text-sm font-semibold">Eliminar</th>
             </tr>
           </thead>
           <tbody>
