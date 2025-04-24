@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Boxes, Package, Truck, Layers, Tags, ArrowRightLeft } from 'lucide-react';
+import { Boxes, Package, Truck, Tags, ArrowRightLeft } from 'lucide-react';
 
 const Home = () => {
   return (

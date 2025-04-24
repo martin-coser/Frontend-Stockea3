@@ -21,8 +21,10 @@ function App() {
         <header className="App-header">
           <nav className="bg-white shadow-md p-4">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <img src="/stockea3Logo.png" alt="Logo" className="w-8 h-8" />
               <h1 className="text-xl font-semibold text-gray-800">Stockea3</h1>
-
+            </div>
               <button
                 onClick={toggleMenu}
                 className="text-gray-800 md:hidden"
