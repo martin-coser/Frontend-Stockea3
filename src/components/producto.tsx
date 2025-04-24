@@ -12,6 +12,7 @@ const Producto: React.FC = () => {
   const [precioIngreso, setPrecioIngreso] = useState('');
   const [precioEgreso, setPrecioEgreso] = useState('');
   const [marca, setMarca] = useState('');
+  const [proveedor, setProveedor] = useState('');
   const [categoria, setCategoria] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [productos, setProductos] = useState([]);
@@ -35,7 +36,7 @@ const Producto: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(API_URL, { nombre, codigo, descripcion, precioIngreso, precioEgreso, marca, categoria });
+      await axios.post(API_URL, { nombre, codigo, descripcion, precioIngreso, precioEgreso, marca, categoria, proveedor });
       setMensaje('Producto registrada con éxito.');
       setNombre('');
       setCodigo('');
@@ -44,6 +45,7 @@ const Producto: React.FC = () => {
       setPrecioEgreso('');
       setMarca('');
       setCategoria('');
+      setProveedor('');
       obtenerProductos();
     } catch (error) {
       console.error('Error al registrar el producto:', error);
@@ -104,6 +106,13 @@ const Producto: React.FC = () => {
             placeholder="Categoria"
             value={categoria}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setCategoria(e.target.value)}
+            className="w-full p-1.5 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
+            placeholder="Proveedor"
+            value={proveedor}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setProveedor(e.target.value)}
             className="w-full p-1.5 border border-gray-300 rounded"
           />
           <button
