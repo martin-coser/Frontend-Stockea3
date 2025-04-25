@@ -54,10 +54,10 @@ const Producto: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-600">
       {/* Formulario para nuevo producto */}
-      <div className="w-1/3 p-8">
-        <h2 className="font-bold text-center">Nuevo Producto</h2>
+      <div className="w-1/3 p-10 ml-60">
+        <h2 className="font-bold mb-4 text-center text-gray-200">Nuevo Producto</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -117,7 +117,7 @@ const Producto: React.FC = () => {
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-800"
+            className="w-full py-2 px-4 bg-indigo-500 text-white rounded-lg border border-indigo-500 hover:bg-indigo-600 focus:ring-4 focus:ring-indigo-300 transition"
           >Registrar</button>
 
           {mensaje && <p className="text-green-600">{mensaje}</p>}
@@ -125,20 +125,20 @@ const Producto: React.FC = () => {
       </div>
 
       {/* Listado de Productos existentes */}
-      <div className="w-2/3 p-8">
-        <h3 className="font-bold mb-4 text-center">Listado de Productos</h3>
-        <table className="w-full table-fixed">
+      <div className="w-2/3 w-full p-8">
+        <h3 className="font-bold mb-6 text-center text-gray-200">Listado de Productos</h3>
+        <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
           <thead>
-            <tr>
-              <th className="px-4 py-2 text-left">Nombre</th>
-              <th className="px-4 py-2 text-left">Codigo</th>
-              <th className="px-4 py-2 text-left">Descripcion</th>
-              <th className="px-4 py-2 text-left">PIngreso</th>
-              <th className="px-4 py-2 text-left">PEgreso</th>
-              <th className="px-4 py-2 text-left">Marca</th>
-              <th className="px-4 py-2 text-left">Categoria</th>
-              <th className="px-4 py-2 text-left">Modificar</th>
-              <th className="px-4 py-2 text-left">Eliminar</th>
+            <tr className="bg-indigo-100">
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Codigo</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Descripcion</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">PIngreso</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">PEgreso</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Marca</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Categoria</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Modificar</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Eliminar</th>
             </tr>
           </thead>
           <tbody>
