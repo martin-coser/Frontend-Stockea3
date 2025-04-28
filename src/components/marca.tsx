@@ -83,7 +83,7 @@ const Marca: React.FC = () => {
             placeholder="Filtrar por nombre..."
             value={filtroNombre}
             onChange={(e) => setFiltroNombre(e.target.value)}
-            className="w-1/2 p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 transition"
+            className="w-1/2 p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
           />
         </div>
   
@@ -106,10 +106,10 @@ const Marca: React.FC = () => {
           </thead>
           <tbody>
             {marcas.map((marca: any) => (
-              <tr key={marca.id} className="hover:bg-green-50">
+              <tr key={marca.id} className="hover:bg-gray-200">
                 <td className="border px-4 py-2 text-sm">{marca.nombre}</td>
                 <td className="border px-4 py-2 text-sm">{marca.descripcion}</td>
-                <td className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-green-700">
+                <td className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700">
                   <PencilSquareIcon className="h-5 w-5 mx-auto" />
                 </td>
                 <td className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700">
