@@ -43,7 +43,7 @@ const Sidebar = () => {
           <Package size={20} /> Productos
         </Link>
         <Link
-          to="/movimientos"
+          to="/movimiento"
           className="flex items-center gap-3 hover:text-indigo-400"
         >
           <RefreshCcw size={20} /> Movimientos

@@ -5,7 +5,7 @@ import { Boxes, Package, Truck, Tags, ArrowRightLeft } from 'lucide-react';
 
 const Home = () => {
   return (
-    <div className="bg-gray-900 min-h-screen flex flex-col items-center justify-center px-4 py-12">
+    <div className="bg-gray-900 min-h-screen flex flex-col items-center justify-center px-4 py-12 ml-20">
       <div className="flex flex-row items-center justify-start w-full max-w-7xl ml-44 md:ml-64">
     <div className="text-white max-w-lg">
       <h1 className="text-5xl md:text-7xl font-extrabold mb-0">
@@ -19,7 +19,7 @@ const Home = () => {
     <img 
       src="/camion.png" 
       alt="Camión de Bienvenida" 
-      className="w-[30rem] h-auto object-contain drop-shadow-2xl" 
+      className="w-[30rem] h-auto object-contain drop-shadow-2xl ml-20" 
     />
   </div>
 </div>

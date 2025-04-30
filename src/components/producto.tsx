@@ -73,7 +73,7 @@ const Producto: React.FC = () => {
     return (
         <motion.div className="flex min-h-screen bg-gray-600" layout>
             {/* Listado de Productos (ahora a la izquierda) */}
-            <motion.div className="p-8 ml-60 flex-1" layout transition={{ duration: 0.1 }}>
+            <motion.div className="p-8 ml-60 flex-1" layout transition={{ duration: 0.2 }}>
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold mt-2 text-gray-200">Listado de Productos</h3>
                     <button
@@ -132,7 +132,7 @@ const Producto: React.FC = () => {
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 100 }}
-                    transition={{ duration: 0.1 }}
+                    transition={{ duration: 0.2 }}
                     className="w-1/4 p-10 "
                     layout
                 >
