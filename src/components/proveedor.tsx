@@ -165,14 +165,14 @@ const Proveedor: React.FC = () => {
                             className="w-full p-1.5 border border-gray-300 rounded"
                         />
                         <input
-                            type="text"
+                            type="number"
                             placeholder="Telefono"
                             value={telefono}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => setTelefono(e.target.value)}
                             className="w-full p-1.5 border border-gray-300 rounded"
                         />
                         <input
-                            type="text"
+                            type="number"
                             placeholder="Cuit"
                             value={cuit}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => setCuit(e.target.value)}
