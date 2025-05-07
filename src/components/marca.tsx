@@ -14,9 +14,11 @@ const Marca: React.FC = () => {
   const [marcas, setMarcas] = useState([]);
   const [todasLasMarcas, setTodasLasMarcas] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
-  const [mostrarFormulario, setMostrarFormulario] = useState(false); // NUEVO estado
+  const [mostrarFormulario, setMostrarFormulario] = useState(false); 
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [idMarcaEditar, setIdMarcaEditar] = useState<number | null>(null);
 
-  // Traer todas las marcas
+  // Traer todas las marcas 
   const obtenerMarcas = async () => {
     try {
       const res = await axios.get(API_URL);
@@ -51,16 +53,54 @@ const Marca: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(API_URL, { nombre, descripcion });
-      setMensaje("Marca registrada con éxito.");
+      if (modoEdicion && idMarcaEditar !== null) {
+        // PATCH para modificar
+        await axios.patch(`${API_URL}/${idMarcaEditar}`, {
+          id: idMarcaEditar, 
+          nombre,
+          descripcion,
+        });
+        setMensaje("Marca actualizada con éxito.");
+      } else {
+        // POST para registrar nueva marca
+        await axios.post(API_URL, { nombre, descripcion });
+        setMensaje("Marca registrada con éxito.");
+      }
+  
       setNombre("");
       setDescripcion("");
+      setModoEdicion(false);
+      setIdMarcaEditar(null);
       obtenerMarcas();
-      setMostrarFormulario(false); // OCULTAR el formulario después de registrar
+      setMostrarFormulario(false);
     } catch (error) {
-      console.error("Error al registrar la marca:", error);
-      setMensaje("Error al registrar la marca.");
+      console.error("Error al registrar/actualizar la marca:", error);
+      setMensaje("Error al registrar/actualizar la marca.");
     }
+  };
+
+  //Eliminar marca
+  const handleEliminarMarca = async (id: number) => {
+    const confirmacion = window.confirm("¿Estás seguro que querés eliminar esta marca?");
+    if (!confirmacion) return;
+  
+    try {
+      await axios.delete(`http://localhost:4000/marca/softDelete/${id}`);
+      alert("Marca eliminada correctamente");
+      obtenerMarcas();
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al eliminar la marca");
+    }
+  };
+
+  //Modificar marca
+  const handleEditarMarca = (marca: any) => {
+    setNombre(marca.nombre);
+    setDescripcion(marca.descripcion);
+    setIdMarcaEditar(marca.id);
+    setModoEdicion(true);
+    setMostrarFormulario(true);
   };
 
   return (
@@ -109,10 +149,16 @@ const Marca: React.FC = () => {
               <tr key={marca.id} className="hover:bg-gray-200">
                 <td className="border px-4 py-2 text-sm">{marca.nombre}</td>
                 <td className="border px-4 py-2 text-sm">{marca.descripcion}</td>
-                <td className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700">
+                <td
+                className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
+                onClick={() => handleEditarMarca(marca)}
+                >
                   <PencilSquareIcon className="h-5 w-5 mx-auto" />
                 </td>
-                <td className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700">
+                <td
+                  className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
+                  onClick={() => handleEliminarMarca(marca.id)}
+                >
                   <TrashIcon className="h-5 w-5 mx-auto" />
                 </td>
               </tr>

@@ -15,6 +15,8 @@ const Categoria: React.FC = () => {
   const [todasLasCategorias, setTodasLasCategorias] = useState([]); // Nuevo estado
   const [filtroNombre, setFiltroNombre] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false); // Estado para controlar el formulario
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [idCategoriaEditar, setIdCategoriaEditar] = useState<number | null>(null);
 
   // Traer todas las categorías
   const obtenerCategorias = async () => {
@@ -51,18 +53,59 @@ const Categoria: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(API_URL, { nombre, descripcion, imagen });
-      setMensaje("Categoría registrada con éxito.");
+      if (modoEdicion && idCategoriaEditar !== null) {
+        // PATCH para modificar
+        await axios.patch(`${API_URL}/${idCategoriaEditar}`, {
+          id: idCategoriaEditar, 
+          nombre,
+          descripcion,
+          imagen
+        });
+        setMensaje("Categoria actualizada con éxito.");
+      } else {
+        // POST para registrar nueva categoria
+        await axios.post(API_URL, { nombre, descripcion, imagen });
+        setMensaje("Categoria registrada con éxito.");
+      }
+  
       setNombre("");
       setDescripcion("");
       setImagen("");
+      setModoEdicion(false);
+      setIdCategoriaEditar(null);
       obtenerCategorias();
-      setMostrarFormulario(false); // Ocultar formulario después de registrar
+      setMostrarFormulario(false);
     } catch (error) {
-      console.error("Error al registrar la categoría:", error);
-      setMensaje("Error al registrar la categoría.");
+      console.error("Error al registrar/actualizar la categoria:", error);
+      setMensaje("Error al registrar/actualizar la categoria.");
     }
   };
+
+    //Eliminar categoria
+    const handleEliminarCategoria = async (id: number) => {
+      const confirmacion = window.confirm("¿Estás seguro que querés eliminar esta categoria?");
+      if (!confirmacion) return;
+    
+      try {
+        await axios.delete(`http://localhost:4000/categoria/softDelete/${id}`);
+        alert("Categoria eliminada correctamente");
+        obtenerCategorias();
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error al eliminar la categoria");
+      }
+    };
+
+    //Modificar categoria
+    const handleEditarCategoria= (categoria: any) => {
+      setNombre(categoria.nombre);
+      setDescripcion(categoria.descripcion);
+      setImagen(categoria.imagen);
+      setIdCategoriaEditar(categoria.id);
+      setModoEdicion(true);
+      setMostrarFormulario(true);
+    };
+  
 
   return (
     <motion.div className="flex min-h-screen bg-gray-600" layout>
@@ -105,10 +148,16 @@ const Categoria: React.FC = () => {
                 <td className="border px-4 py-2 text-sm">{categoria.nombre}</td>
                 <td className="border px-4 py-2 text-sm">{categoria.descripcion}</td>
                 <td className="border px-4 py-2 text-sm">{categoria.imagen}</td>
-                <td className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700">
-                  <PencilSquareIcon className="h-5 w-5 mx-auto" />
+                <td
+                  className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
+                  onClick={() => handleEditarCategoria(categoria)}
+                  >
+                    <PencilSquareIcon className="h-5 w-5 mx-auto" />
                 </td>
-                <td className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700">
+                <td
+                  className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
+                  onClick={() => handleEliminarCategoria(categoria.id)}
+                >
                   <TrashIcon className="h-5 w-5 mx-auto" />
                 </td>
               </tr>

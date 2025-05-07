@@ -66,6 +66,21 @@ const Proveedor: React.FC = () => {
         }
     };
 
+    //Eliminar proveedor
+    const handleEliminarProveedor = async (id: number) => {
+        const confirmacion = window.confirm("¿Estás seguro que querés eliminar este proveedor?");
+        if (!confirmacion) return;
+        
+        try {
+            await axios.delete(`http://localhost:4000/proveedor/softDelete/${id}`);
+            alert("Proveedor eliminada correctamente");
+            obtenerProveedores();
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error al eliminar el proveedor");
+        }
+        };
+
     return (
         <motion.div className="flex min-h-screen bg-gray-600" layout>
             {/* Listado de Proveedores (ahora a la izquierda) */}
@@ -111,7 +126,10 @@ const Proveedor: React.FC = () => {
                                 <td className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700">
                                     <PencilSquareIcon className="h-5 w-5 mx-auto" />
                                 </td>
-                                <td className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700">
+                                <td
+                                    className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
+                                    onClick={() => handleEliminarProveedor(proveedor.id)}
+                                >
                                     <TrashIcon className="h-5 w-5 mx-auto" />
                                 </td>
                             </tr>
