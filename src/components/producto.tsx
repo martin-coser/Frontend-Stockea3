@@ -240,26 +240,26 @@ const Producto: React.FC = () => {
               placeholder="Nombre"
               value={nombre}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             />
             <input
               type="text"
               placeholder="Código"
               value={codigo}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setCodigo(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             />
             <input
               type="text"
               placeholder="Descripción"
               value={descripcion}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setDescripcion(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             />
             <select
               value={marca}
               onChange={(e) => setMarca(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             >
               <option value="">Seleccionar marca</option>
               {marcasDisponibles.map((m) => (
@@ -271,7 +271,7 @@ const Producto: React.FC = () => {
             <select
               value={categoria}
               onChange={(e) => setCategoria(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             >
               <option value="">Seleccionar categoría</option>
               {categoriasDisponibles.map((c) => (
@@ -283,7 +283,7 @@ const Producto: React.FC = () => {
             <select
               value={proveedor}
               onChange={(e) => setProveedor(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             >
               <option value="">Seleccionar proveedor</option>
               {proveedoresDisponibles.map((p) => (

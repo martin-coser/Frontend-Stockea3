@@ -193,7 +193,7 @@ const Marca: React.FC = () => {
               placeholder="Nombre"
               value={nombre}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             />
             <input
               type="text"

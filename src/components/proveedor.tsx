@@ -204,28 +204,28 @@ const Proveedor: React.FC = () => {
               placeholder="Nombre"
               value={nombre}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             />
             <input
               type="text"
               placeholder="Código"
               value={codigo}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setCodigo(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             />
             <input
               type="number"
               placeholder="Teléfono"
               value={telefono}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setTelefono(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             />
             <input
               type="number"
               placeholder="CUIT"
               value={cuit}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setCuit(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
+              className="w-full p-1.5 border border-gray-300 rounded" required
             />
             <button
               type="submit"
