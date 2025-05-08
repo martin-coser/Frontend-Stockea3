@@ -1,24 +1,24 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
-import { TrashIcon } from "@heroicons/react/24/outline";
-import { motion } from 'framer-motion';
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { motion } from "framer-motion";
 
-
+// URL base para los endpoints relacionados con marcas
 const API_URL = "http://localhost:4000/marca";
 
 const Marca: React.FC = () => {
+  // Estados para gestionar los inputs del formulario, lista de marcas y estados de la UI
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [marcas, setMarcas] = useState([]);
   const [todasLasMarcas, setTodasLasMarcas] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
-  const [mostrarFormulario, setMostrarFormulario] = useState(false); 
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idMarcaEditar, setIdMarcaEditar] = useState<number | null>(null);
 
-  // Traer todas las marcas 
+  // Obtiene todas las marcas desde la API y actualiza el estado
   const obtenerMarcas = async () => {
     try {
       const res = await axios.get(API_URL);
@@ -29,7 +29,7 @@ const Marca: React.FC = () => {
     }
   };
 
-  // Filtrar marcas
+  // Filtra las marcas según el texto de búsqueda
   const filtrarMarcas = (nombreFiltro: string) => {
     const resultado = todasLasMarcas.filter((marca: any) =>
       marca.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())
@@ -37,55 +37,41 @@ const Marca: React.FC = () => {
     setMarcas(resultado);
   };
 
-  useEffect(() => {
-    if (filtroNombre.trim() === "") {
-      setMarcas(todasLasMarcas);
-    } else {
-      filtrarMarcas(filtroNombre);
-    }
-  }, [filtroNombre, todasLasMarcas]);
-
-  useEffect(() => {
-    obtenerMarcas();
-  }, []);
-
-  // Registrar nueva marca
+  // Maneja el envío del formulario para crear o actualizar una marca
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       if (modoEdicion && idMarcaEditar !== null) {
-        // PATCH para modificar
         await axios.patch(`${API_URL}/${idMarcaEditar}`, {
-          id: idMarcaEditar, 
+          id: idMarcaEditar,
           nombre,
           descripcion,
         });
         setMensaje("Marca actualizada con éxito.");
       } else {
-        // POST para registrar nueva marca
         await axios.post(API_URL, { nombre, descripcion });
         setMensaje("Marca registrada con éxito.");
       }
-  
+
       setNombre("");
       setDescripcion("");
       setModoEdicion(false);
       setIdMarcaEditar(null);
-      obtenerMarcas();
       setMostrarFormulario(false);
+      obtenerMarcas();
     } catch (error) {
       console.error("Error al registrar/actualizar la marca:", error);
       setMensaje("Error al registrar/actualizar la marca.");
     }
   };
 
-  //Eliminar marca
+  // Elimina una marca tras confirmación del usuario
   const handleEliminarMarca = async (id: number) => {
     const confirmacion = window.confirm("¿Estás seguro que querés eliminar esta marca?");
     if (!confirmacion) return;
-  
+
     try {
-      await axios.delete(`http://localhost:4000/marca/softDelete/${id}`);
+      await axios.delete(`${API_URL}/softDelete/${id}`);
       alert("Marca eliminada correctamente");
       obtenerMarcas();
     } catch (error) {
@@ -94,7 +80,7 @@ const Marca: React.FC = () => {
     }
   };
 
-  //Modificar marca
+  // Prepara el formulario para editar una marca existente
   const handleEditarMarca = (marca: any) => {
     setNombre(marca.nombre);
     setDescripcion(marca.descripcion);
@@ -103,12 +89,35 @@ const Marca: React.FC = () => {
     setMostrarFormulario(true);
   };
 
+  // Efectos para la carga inicial de datos y filtrado
+  useEffect(() => {
+    obtenerMarcas();
+  }, []);
+
+  // Actualiza las marcas mostradas según el filtro de búsqueda
+  useEffect(() => {
+    if (filtroNombre.trim() === "") {
+      setMarcas(todasLasMarcas);
+    } else {
+      filtrarMarcas(filtroNombre);
+    }
+  }, [filtroNombre, todasLasMarcas]);
+
   return (
-    <motion.div className="flex min-h-screen bg-gray-600" layout>
-      {/* Listado de marcas (ahora a la izquierda) */}
-      <motion.div className="p-8 ml-60 flex-1" layout transition={{ duration: 0.2 }}>
+    <motion.div
+      className="flex min-h-screen bg-gray-600"
+      layout
+    >
+      {/* Sección de Listado de Marcas */}
+      <motion.div
+        className="flex-1 p-8 ml-60"
+        layout
+        transition={{ duration: 0.2 }}
+      >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold mt-2 text-gray-200">Listado de Marcas</h3>
+          <h3 className="font-bold text-gray-200 mt-2">
+            Listado de Marcas
+          </h3>
           <button
             onClick={() => setMostrarFormulario(true)}
             className="w-1/8 py-2 px-4 bg-indigo-500 text-white rounded-lg border border-indigo-500 hover:bg-indigo-600 focus:ring-1 focus:ring-indigo-300 transition"
@@ -116,7 +125,7 @@ const Marca: React.FC = () => {
             Nueva Marca
           </button>
         </div>
-  
+
         <div className="mb-4">
           <input
             type="text"
@@ -126,32 +135,27 @@ const Marca: React.FC = () => {
             className="w-1/2 p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
           />
         </div>
-  
+
         <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
           <thead>
             <tr className="bg-indigo-100">
-              <th className="border px-4 py-2 text-left text-sm font-semibold">
-                Nombre
-              </th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">
-                Descripción
-              </th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">
-                Modificar
-              </th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">
-                Eliminar
-              </th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Descripción</th>
+              <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
+              <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
             </tr>
           </thead>
           <tbody>
             {marcas.map((marca: any) => (
-              <tr key={marca.id} className="hover:bg-gray-200">
+              <tr
+                key={marca.id}
+                className="hover:bg-gray-200"
+              >
                 <td className="border px-4 py-2 text-sm">{marca.nombre}</td>
                 <td className="border px-4 py-2 text-sm">{marca.descripcion}</td>
                 <td
-                className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
-                onClick={() => handleEditarMarca(marca)}
+                  className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
+                  onClick={() => handleEditarMarca(marca)}
                 >
                   <PencilSquareIcon className="h-5 w-5 mx-auto" />
                 </td>
@@ -166,8 +170,8 @@ const Marca: React.FC = () => {
           </tbody>
         </table>
       </motion.div>
-  
-      {/* Formulario para nueva marca (a la derecha) */}
+
+      {/* Sección de Formulario para Nueva Marca */}
       {mostrarFormulario && (
         <motion.div
           initial={{ opacity: 0, x: 100 }}
@@ -180,23 +184,22 @@ const Marca: React.FC = () => {
           <h2 className="font-bold mb-4 text-center text-gray-200">
             Nueva Marca
           </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             <input
               type="text"
               placeholder="Nombre"
               value={nombre}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setNombre(e.target.value)
-              }
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
               className="w-full p-1.5 border border-gray-300 rounded"
             />
             <input
               type="text"
               placeholder="Descripción"
               value={descripcion}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setDescripcion(e.target.value)
-              }
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setDescripcion(e.target.value)}
               className="w-full p-1.5 border border-gray-300 rounded"
             />
             <button
@@ -205,8 +208,9 @@ const Marca: React.FC = () => {
             >
               Registrar
             </button>
-  
-            {mensaje && <p className="text-green-600">{mensaje}</p>}
+            {mensaje && (
+              <p className="text-green-600">{mensaje}</p>
+            )}
           </form>
         </motion.div>
       )}

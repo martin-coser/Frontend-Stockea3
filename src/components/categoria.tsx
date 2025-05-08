@@ -1,35 +1,36 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
-import { TrashIcon } from "@heroicons/react/24/outline";
-import { motion } from 'framer-motion';
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { motion } from "framer-motion";
 
+// URL base para los endpoints relacionados con categorías
 const API_URL = "http://localhost:4000/categoria";
 
 const Categoria: React.FC = () => {
+  // Estados para gestionar los inputs del formulario, lista de categorías y estados de la UI
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [imagen, setImagen] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [categorias, setCategorias] = useState([]);
-  const [todasLasCategorias, setTodasLasCategorias] = useState([]); // Nuevo estado
+  const [todasLasCategorias, setTodasLasCategorias] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
-  const [mostrarFormulario, setMostrarFormulario] = useState(false); // Estado para controlar el formulario
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idCategoriaEditar, setIdCategoriaEditar] = useState<number | null>(null);
 
-  // Traer todas las categorías
+  // Obtiene todas las categorías desde la API y actualiza el estado
   const obtenerCategorias = async () => {
     try {
       const res = await axios.get(API_URL);
       setCategorias(res.data);
-      setTodasLasCategorias(res.data); // Guardamos todas
+      setTodasLasCategorias(res.data);
     } catch (error) {
       console.error("Error al obtener las categorías:", error);
     }
   };
 
-  // Filtrar categorías por nombre
+  // Filtra las categorías según el texto de búsqueda
   const filtrarCategorias = (nombreFiltro: string) => {
     const resultado = todasLasCategorias.filter((categoria: any) =>
       categoria.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())
@@ -37,82 +38,90 @@ const Categoria: React.FC = () => {
     setCategorias(resultado);
   };
 
-  useEffect(() => {
-    if (filtroNombre.trim() === "") {
-      setCategorias(todasLasCategorias); // Mostrar todas si no hay filtro
-    } else {
-      filtrarCategorias(filtroNombre);
-    }
-  }, [filtroNombre, todasLasCategorias]);
-
-  useEffect(() => {
-    obtenerCategorias();
-  }, []);
-
-  // Registrar nueva categoría
+  // Maneja el envío del formulario para crear o actualizar una categoría
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       if (modoEdicion && idCategoriaEditar !== null) {
-        // PATCH para modificar
         await axios.patch(`${API_URL}/${idCategoriaEditar}`, {
-          id: idCategoriaEditar, 
+          id: idCategoriaEditar,
           nombre,
           descripcion,
-          imagen
+          imagen,
         });
-        setMensaje("Categoria actualizada con éxito.");
+        setMensaje("Categoría actualizada con éxito.");
       } else {
-        // POST para registrar nueva categoria
         await axios.post(API_URL, { nombre, descripcion, imagen });
-        setMensaje("Categoria registrada con éxito.");
+        setMensaje("Categoría registrada con éxito.");
       }
-  
+
       setNombre("");
       setDescripcion("");
       setImagen("");
       setModoEdicion(false);
       setIdCategoriaEditar(null);
-      obtenerCategorias();
       setMostrarFormulario(false);
+      obtenerCategorias();
     } catch (error) {
-      console.error("Error al registrar/actualizar la categoria:", error);
-      setMensaje("Error al registrar/actualizar la categoria.");
+      console.error("Error al registrar/actualizar la categoría:", error);
+      setMensaje("Error al registrar/actualizar la categoría.");
     }
   };
 
-    //Eliminar categoria
-    const handleEliminarCategoria = async (id: number) => {
-      const confirmacion = window.confirm("¿Estás seguro que querés eliminar esta categoria?");
-      if (!confirmacion) return;
-    
-      try {
-        await axios.delete(`http://localhost:4000/categoria/softDelete/${id}`);
-        alert("Categoria eliminada correctamente");
-        obtenerCategorias();
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Error al eliminar la categoria");
-      }
-    };
+  // Elimina una categoría tras confirmación del usuario
+  const handleEliminarCategoria = async (id: number) => {
+    const confirmacion = window.confirm("¿Estás seguro que querés eliminar esta categoría?");
+    if (!confirmacion) return;
 
-    //Modificar categoria
-    const handleEditarCategoria= (categoria: any) => {
-      setNombre(categoria.nombre);
-      setDescripcion(categoria.descripcion);
-      setImagen(categoria.imagen);
-      setIdCategoriaEditar(categoria.id);
-      setModoEdicion(true);
-      setMostrarFormulario(true);
-    };
-  
+    try {
+      await axios.delete(`${API_URL}/softDelete/${id}`);
+      alert("Categoría eliminada correctamente");
+      obtenerCategorias();
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al eliminar la categoría");
+    }
+  };
+
+  // Prepara el formulario para editar una categoría existente
+  const handleEditarCategoria = (categoria: any) => {
+    setNombre(categoria.nombre);
+    setDescripcion(categoria.descripcion);
+    setImagen(categoria.imagen);
+    setIdCategoriaEditar(categoria.id);
+    setModoEdicion(true);
+    setMostrarFormulario(true);
+  };
+
+  // Efectos para la carga inicial de datos y filtrado
+  useEffect(() => {
+    obtenerCategorias();
+  }, []);
+
+  // Actualiza las categorías mostradas según el filtro de búsqueda
+  useEffect(() => {
+    if (filtroNombre.trim() === "") {
+      setCategorias(todasLasCategorias);
+    } else {
+      filtrarCategorias(filtroNombre);
+    }
+  }, [filtroNombre, todasLasCategorias]);
 
   return (
-    <motion.div className="flex min-h-screen bg-gray-600" layout>
-      {/* Listado de categorías (ahora a la izquierda) */}
-      <motion.div className="p-8 ml-60 flex-1" layout transition={{ duration: 0.2 }}>
+    <motion.div
+      className="flex min-h-screen bg-gray-600"
+      layout
+    >
+      {/* Sección de Listado de Categorías */}
+      <motion.div
+        className="flex-1 p-8 ml-60"
+        layout
+        transition={{ duration: 0.2 }}
+      >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold mt-2 text-gray-200">Listado de Categorías</h3>
+          <h3 className="font-bold text-gray-200 mt-2">
+            Listado de Categorías
+          </h3>
           <button
             onClick={() => setMostrarFormulario(true)}
             className="w-1/8 py-2 px-4 bg-indigo-500 text-white rounded-lg border border-indigo-500 hover:bg-indigo-600 focus:ring-1 focus:ring-indigo-300 transition"
@@ -141,18 +150,20 @@ const Categoria: React.FC = () => {
               <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
             </tr>
           </thead>
-
           <tbody>
             {categorias.map((categoria: any) => (
-              <tr key={categoria.id} className="hover:bg-gray-200">
+              <tr
+                key={categoria.id}
+                className="hover:bg-gray-200"
+              >
                 <td className="border px-4 py-2 text-sm">{categoria.nombre}</td>
                 <td className="border px-4 py-2 text-sm">{categoria.descripcion}</td>
                 <td className="border px-4 py-2 text-sm">{categoria.imagen}</td>
                 <td
                   className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
                   onClick={() => handleEditarCategoria(categoria)}
-                  >
-                    <PencilSquareIcon className="h-5 w-5 mx-auto" />
+                >
+                  <PencilSquareIcon className="h-5 w-5 mx-auto" />
                 </td>
                 <td
                   className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
@@ -166,7 +177,7 @@ const Categoria: React.FC = () => {
         </table>
       </motion.div>
 
-      {/* Formulario para nueva categoría (a la derecha) */}
+      {/* Sección de Formulario para Nueva Categoría */}
       {mostrarFormulario && (
         <motion.div
           initial={{ opacity: 0, x: 100 }}
@@ -176,8 +187,13 @@ const Categoria: React.FC = () => {
           className="w-1/4 p-10"
           layout
         >
-          <h2 className="font-bold mb-4 text-center text-gray-200">Nueva Categoría</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <h2 className="font-bold mb-4 text-center text-gray-200">
+            Nueva Categoría
+          </h2>
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             <input
               type="text"
               placeholder="Nombre"
@@ -205,8 +221,9 @@ const Categoria: React.FC = () => {
             >
               Registrar
             </button>
-
-            {mensaje && <p className="text-green-600">{mensaje}</p>}
+            {mensaje && (
+              <p className="text-green-600">{mensaje}</p>
+            )}
           </form>
         </motion.div>
       )}
