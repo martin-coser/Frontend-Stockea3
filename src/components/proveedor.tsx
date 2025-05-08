@@ -52,7 +52,7 @@ const Proveedor: React.FC = () => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            await axios.post(API_URL, { nombre, codigo, telefono, cuit });
+            await axios.post(API_URL, { nombre, codigo, telefono: parseInt(telefono), cuit: parseInt(cuit) });
             setMensaje("Proveedor registrado con éxito.");
             setNombre("");
             setCodigo("");
