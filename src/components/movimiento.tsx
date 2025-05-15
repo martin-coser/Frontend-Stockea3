@@ -30,6 +30,8 @@ const Movimiento: React.FC = () => {
   // Estado para el modal de ver movimiento
   const [mostrarModalVer, setMostrarModalVer] = useState(false);
   const [movimientoSeleccionado, setMovimientoSeleccionado] = useState<any | null>(null);
+  // Estado para el modal de egreso
+  const [mostrarModalEgreso, setMostrarModalEgreso] = useState(false);
 
   // Obtiene todos los movimientos desde la API
   const obtenerMovimientos = async () => {
@@ -67,47 +69,6 @@ const Movimiento: React.FC = () => {
       producto.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())
     );
     setProductos(resultado);
-  };
-
-  // Maneja el envío del formulario para crear o actualizar un movimiento (para edición o egreso)
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!nombre || !tipoMovimiento || !fecha) {
-      setMensaje("Todos los campos son obligatorios.");
-      return;
-    }
-
-    try {
-      const tipoMovimientoNum = tipoMovimiento === "INGRESO" ? 0 : 1;
-      if (modoEdicion && idMovimientoEditar !== null) {
-        await axios.patch(`${API_URL}/${idMovimientoEditar}`, {
-          id: idMovimientoEditar,
-          nombre,
-          tipoMovimiento: tipoMovimientoNum,
-          fecha,
-        });
-        setMensaje("Movimiento actualizado con éxito.");
-      } else {
-        await axios.post(API_URL, {
-          nombre,
-          tipoMovimiento: tipoMovimientoNum,
-          fecha,
-        });
-        setMensaje("Movimiento registrado con éxito.");
-      }
-
-      setNombre("");
-      setTipoMovimiento("");
-      setFecha("");
-      setModoEdicion(false);
-      setIdMovimientoEditar(null);
-      setMostrarFormulario(false);
-      setTipoFormulario(null);
-      obtenerMovimientos();
-    } catch (error) {
-      console.error("Error al registrar/actualizar el movimiento:", error);
-      setMensaje("Error al registrar/actualizar el movimiento.");
-    }
   };
 
   // Maneja el envío del formulario del modal de ingreso
@@ -228,14 +189,14 @@ const Movimiento: React.FC = () => {
     setMostrarModalIngreso(true);
   };
 
-  // Abre el formulario para registrar un egreso
+  // Abre el modal para registrar un egreso
   const handleRegistrarEgreso = () => {
+    setCosto("");
     setNombre("");
-    setTipoMovimiento("EGRESO");
-    setModoEdicion(false);
-    setIdMovimientoEditar(null);
-    setTipoFormulario("EGRESO");
-    setMostrarFormulario(true);
+    setProductosSeleccionados([]);
+    setCantidades({});
+    setFiltroProductos("");
+    setMostrarModalEgreso(true);
   };
 
   return (
@@ -300,59 +261,7 @@ const Movimiento: React.FC = () => {
           </tbody>
         </table>
       </motion.div>
-
-      {/* Sección de Formulario para Editar o Registrar Egreso */}
-      {mostrarFormulario && (
-        <motion.div
-          initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 100 }}
-          transition={{ duration: 0.2 }}
-          className="w-1/4 p-10"
-          layout
-        >
-          <h2 className="font-bold mb-4 text-center text-gray-200">
-            {modoEdicion ? "Editar Movimiento" : `Registrar ${tipoFormulario}`}
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={nombre}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
-              required
-            />
-            <select
-              value={tipoMovimiento}
-              onChange={(e) => setTipoMovimiento(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
-              required
-              disabled={modoEdicion}
-            >
-              <option value="">Seleccionar tipo</option>
-              <option value="INGRESO">Ingreso</option>
-              <option value="EGRESO">Egreso</option>
-            </select>
-            <input
-              type="date"
-              placeholder="Fecha"
-              value={fecha}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFecha(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
-              required
-            />
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-indigo-500 text-white rounded-lg border border-indigo-500 hover:bg-indigo-600 focus:ring-1 focus:ring-indigo-300 transition"
-            >
-              {modoEdicion ? "Actualizar" : "Registrar"}
-            </button>
-            {mensaje && <p className="text-green-600">{mensaje}</p>}
-          </form>
-        </motion.div>
-      )}
-
+      
       {/* Modal para Registrar Ingreso */}
       {mostrarModalIngreso && (
         <motion.div
@@ -456,6 +365,103 @@ const Movimiento: React.FC = () => {
                 Registrar Movimiento
               </button>
               {mensaje && <p className="text-green-600">{mensaje}</p>}
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Modal para Registrar Egreso */}
+      {mostrarModalEgreso && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-gray-600 p-6 rounded-lg shadow-lg w-3/4 max-w-4xl"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-bold text-gray-200 text-xl">Registrar Egreso</h2>
+              <button
+                onClick={() => setMostrarModalEgreso(false)}
+                className="text-gray-200 hover:text-gray-400"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            <form className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input
+                  type="text"
+                  placeholder="Nombre"
+                  value={nombre}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
+                  className="w-full p-1.5 border border-gray-300 rounded"
+                />
+              </div>
+              <div className="mt-4">
+                <h3 className="font-semibold text-gray-200 mb-2">Seleccionar Productos</h3>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Filtrar por nombre..."
+                    value={filtroProductos}
+                    onChange={(e) => setFiltroProductos(e.target.value)}
+                    className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+                  />
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  <table className="w-full border-collapse rounded-lg shadow-md border border-indigo-200 bg-gray-100">
+                    <thead>
+                      <tr className="bg-indigo-100 sticky top-0">
+                        <th className="border px-4 py-2 text-left text-sm font-semibold">Seleccionar</th>
+                        <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+                        <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
+                        <th className="border px-4 py-2 text-left text-sm font-semibold">Categoría</th>
+                        <th className="border px-4 py-2 text-left text-sm font-semibold">Cantidad</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {productos.map((producto: any) => (
+                        <tr key={producto.id} className="hover:bg-gray-200">
+                          <td className="border px-4 py-2 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={productosSeleccionados.includes(producto.id)}
+                              onChange={() => handleSeleccionProducto(producto.id)}
+                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                            />
+                          </td>
+                          <td className="border px-4 py-2 text-sm">{producto.nombre}</td>
+                          <td className="border px-4 py-2 text-sm">{producto.codigo}</td>
+                          <td className="border px-4 py-2 text-sm">{producto.categoria.nombre}</td>
+                          <td className="border px-4 py-2 text-sm">
+                            <input
+                              type="number"
+                              placeholder="Cantidad"
+                              value={cantidades[producto.id] || ""}
+                              onChange={(e) => handleCantidadChange(producto.id, e.target.value)}
+                              className="w-full p-1.5 border border-gray-300 rounded"
+                              disabled={!productosSeleccionados.includes(producto.id)}
+                              min="1"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full py-2 px-4 bg-indigo-500 text-white rounded-lg border border-indigo-500 hover:bg-indigo-600 focus:ring-1 focus:ring-indigo-300 transition"
+              >
+                Registrar Movimiento
+              </button>
             </form>
           </motion.div>
         </motion.div>
