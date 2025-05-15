@@ -10,7 +10,6 @@ const Categoria: React.FC = () => {
   // Estados para gestionar los inputs del formulario, lista de categorías y estados de la UI
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [imagen, setImagen] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [todasLasCategorias, setTodasLasCategorias] = useState([]);
@@ -47,17 +46,15 @@ const Categoria: React.FC = () => {
           id: idCategoriaEditar,
           nombre,
           descripcion,
-          imagen,
         });
         setMensaje("Categoría actualizada con éxito.");
       } else {
-        await axios.post(API_URL, { nombre, descripcion, imagen });
+        await axios.post(API_URL, { nombre, descripcion });
         setMensaje("Categoría registrada con éxito.");
       }
 
       setNombre("");
       setDescripcion("");
-      setImagen("");
       setModoEdicion(false);
       setIdCategoriaEditar(null);
       setMostrarFormulario(false);
@@ -87,7 +84,6 @@ const Categoria: React.FC = () => {
   const handleEditarCategoria = (categoria: any) => {
     setNombre(categoria.nombre);
     setDescripcion(categoria.descripcion);
-    setImagen(categoria.imagen);
     setIdCategoriaEditar(categoria.id);
     setModoEdicion(true);
     setMostrarFormulario(true);
@@ -145,7 +141,6 @@ const Categoria: React.FC = () => {
             <tr className="bg-indigo-100">
               <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
               <th className="border px-4 py-2 text-left text-sm font-semibold">Descripción</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Imagen</th>
               <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
               <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
             </tr>
@@ -158,7 +153,6 @@ const Categoria: React.FC = () => {
               >
                 <td className="border px-4 py-2 text-sm">{categoria.nombre}</td>
                 <td className="border px-4 py-2 text-sm">{categoria.descripcion}</td>
-                <td className="border px-4 py-2 text-sm">{categoria.imagen}</td>
                 <td
                   className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
                   onClick={() => handleEditarCategoria(categoria)}
@@ -206,13 +200,6 @@ const Categoria: React.FC = () => {
               placeholder="Descripción"
               value={descripcion}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setDescripcion(e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded"
-            />
-            <input
-              type="text"
-              placeholder="Imagen"
-              value={imagen}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setImagen(e.target.value)}
               className="w-full p-1.5 border border-gray-300 rounded"
             />
             <button

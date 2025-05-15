@@ -9,6 +9,7 @@ import Categoria from './components/categoria';
 import Proveedor from './components/proveedor';
 import Producto from './components/producto';
 import Movimiento from './components/movimiento';
+import Stock from './components/stock';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/proveedor" element={<Proveedor />} />
             <Route path="/producto" element={<Producto />} />
             <Route path="/movimiento" element={<Movimiento />} />
+            <Route path="/stock" element={<Stock />} />
           </Routes>
         </div>
       </div>

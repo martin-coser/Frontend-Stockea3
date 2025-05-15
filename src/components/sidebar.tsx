@@ -6,6 +6,7 @@ import {
   Truck,
   Package,
   RefreshCcw,
+  Boxes,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -47,6 +48,12 @@ const Sidebar = () => {
           className="flex items-center gap-3 hover:text-indigo-400"
         >
           <RefreshCcw size={20} /> Movimientos
+        </Link>
+        <Link
+          to="/stock"
+          className="flex items-center gap-3 hover:text-indigo-400"
+        >
+          <Boxes size={20} /> Stock
         </Link>
       </nav>
     </div>
