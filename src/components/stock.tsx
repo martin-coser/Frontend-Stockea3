@@ -16,8 +16,12 @@ const Stock: React.FC = () => {
     try {
       const res = await axios.get(API_URL);
       const productosConStock = res.data.filter((producto: any) => producto.stock > 0);
-      setProductos(productosConStock);
-      setTodosLosProductos(productosConStock);
+      // Filtrar productos que NO están eliminados (sin deletedAt)
+      const productosFiltrados = productosConStock.filter(
+        (producto: any) => !producto.deletedAt
+      );
+      setProductos(productosFiltrados);
+      setTodosLosProductos(productosFiltrados);
     } catch (error) {
       console.error("Error al obtener los productos:", error);
     }

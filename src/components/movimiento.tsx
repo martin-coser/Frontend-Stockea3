@@ -42,8 +42,12 @@ const Movimiento: React.FC = () => {
   const obtenerProductos = async () => {
     try {
       const res = await axios.get(PRODUCTOS_API_URL);
-      setProductos(res.data);
-      setTodosLosProductos(res.data);
+      // Filtrar productos que NO están eliminados (sin deletedAt)
+      const productosFiltrados = res.data.filter(
+        (producto: any) => !producto.deletedAt
+      );
+      setProductos(productosFiltrados);
+      setTodosLosProductos(productosFiltrados);
     } catch (error) {
       console.error("Error al obtener los productos:", error);
     }
@@ -371,6 +375,7 @@ const Movimiento: React.FC = () => {
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Categoría</th>
+                        <th className="border px-4 py-2 text-left text-sm font-semibold">Proveedor</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Cantidad</th>
                       </tr>
                     </thead>
@@ -388,6 +393,7 @@ const Movimiento: React.FC = () => {
                           <td className="border px-4 py-2 text-sm">{producto.nombre}</td>
                           <td className="border px-4 py-2 text-sm">{producto.codigo}</td>
                           <td className="border px-4 py-2 text-sm">{producto.categoria.nombre}</td>
+                          <td className="border px-4 py-2 text-sm">{producto.proveedor.nombre}</td>
                           <td className="border px-4 py-2 text-sm">
                             <input
                               type="number"
@@ -469,6 +475,7 @@ const Movimiento: React.FC = () => {
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Categoría</th>
+                        <th className="border px-4 py-2 text-left text-sm font-semibold">Proveedor</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Cantidad</th>
                       </tr>
                     </thead>
@@ -486,6 +493,7 @@ const Movimiento: React.FC = () => {
                           <td className="border px-4 py-2 text-sm">{producto.nombre}</td>
                           <td className="border px-4 py-2 text-sm">{producto.codigo}</td>
                           <td className="border px-4 py-2 text-sm">{producto.categoria.nombre}</td>
+                          <td className="border px-4 py-2 text-sm">{producto.proveedor.nombre}</td>
                           <td className="border px-4 py-2 text-sm">
                             <input
                               type="number"
