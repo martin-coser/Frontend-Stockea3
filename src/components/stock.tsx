@@ -15,8 +15,9 @@ const Stock: React.FC = () => {
   const obtenerProductos = async () => {
     try {
       const res = await axios.get(API_URL);
-      setProductos(res.data);
-      setTodosLosProductos(res.data);
+      const productosConStock = res.data.filter((producto: any) => producto.stock > 0);
+      setProductos(productosConStock);
+      setTodosLosProductos(productosConStock);
     } catch (error) {
       console.error("Error al obtener los productos:", error);
     }
@@ -76,6 +77,7 @@ const Stock: React.FC = () => {
             <tr className="bg-indigo-100">
               <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
               <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
+              <th className="border px-4 py-2 text-left text-sm font-semibold">Stock</th>
               <th className="border px-4 py-2 text-left text-sm font-semibold">Descripción</th>
               <th className="border px-4 py-2 text-left text-sm font-semibold">Marca</th>
               <th className="border px-4 py-2 text-left text-sm font-semibold">Categoría</th>
@@ -90,6 +92,7 @@ const Stock: React.FC = () => {
               >
                 <td className="border px-4 py-2 text-sm">{producto.nombre}</td>
                 <td className="border px-4 py-2 text-sm">{producto.codigo}</td>
+                <td className="border px-4 py-2 text-sm">{producto.stock}</td>
                 <td className="border px-4 py-2 text-sm">{producto.descripcion}</td>
                 <td className="border px-4 py-2 text-sm">{producto.marca.nombre}</td>
                 <td className="border px-4 py-2 text-sm">{producto.categoria.nombre}</td>

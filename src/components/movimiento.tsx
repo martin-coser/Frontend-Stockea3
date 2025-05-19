@@ -9,16 +9,10 @@ const PRODUCTOS_API_URL = "http://localhost:4000/producto";
 const Movimiento: React.FC = () => {
   // Estados para gestionar los inputs del formulario, lista de movimientos y estados de la UI
   const [nombre, setNombre] = useState("");
-  const [tipoMovimiento, setTipoMovimiento] = useState("");
-  const [fecha, setFecha] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [movimientos, setMovimientos] = useState([]);
   const [todosLosMovimientos, setTodosLosMovimientos] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [modoEdicion, setModoEdicion] = useState(false);
-  const [idMovimientoEditar, setIdMovimientoEditar] = useState<number | null>(null);
-  const [tipoFormulario, setTipoFormulario] = useState<"INGRESO" | "EGRESO" | null>(null);
   // Estados para el modal de ingreso
   const [mostrarModalIngreso, setMostrarModalIngreso] = useState(false);
   const [costo, setCosto] = useState("");
@@ -131,6 +125,59 @@ const Movimiento: React.FC = () => {
     } catch (error) {
       console.error("Error al registrar los movimientos de ingreso:", error);
       setMensaje("Error al registrar los movimientos de ingreso.");
+    }
+  };
+
+    // Maneja el envío del formulario del modal de egreso
+  const handleSubmitEgreso = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!nombre || productosSeleccionados.length === 0) {
+      setMensaje("Todos los campos son obligatorios y debe seleccionar al menos un producto.");
+      return;
+    }
+
+    // Validar que todos los productos seleccionados tengan una cantidad válida
+    for (const id of productosSeleccionados) {
+      if (!cantidades[id] || parseInt(cantidades[id]) <= 0) {
+        setMensaje("Debe especificar una cantidad válida para cada producto seleccionado.");
+        return;
+      }
+    }
+
+    try {
+      // Calcular la suma total de las cantidades
+      const totalCantidades = productosSeleccionados.reduce(
+        (sum, id) => sum + parseInt(cantidades[id]),
+        0
+      );
+      if (totalCantidades <= 0) {
+        setMensaje("La suma total de las cantidades debe ser mayor que cero.");
+        return;
+      }
+
+      // Crear un movimiento por cada producto seleccionado
+      for (const id of productosSeleccionados) {
+        const cantidad = parseInt(cantidades[id]);
+        const movimiento = {
+          nombre,
+          tipoMovimiento: 1, // 1 para EGRESO
+          producto: id,
+          cantidad,
+        };
+        console.log("JSON del movimiento a enviar:", JSON.stringify(movimiento, null, 2));
+        await axios.post(API_URL, movimiento);
+      }
+      setMensaje("Movimientos de egreso registrados con éxito.");
+      setCosto("");
+      setNombre("");
+      setProductosSeleccionados([]);
+      setCantidades({});
+      setFiltroProductos("");
+      setMostrarModalEgreso(false);
+      obtenerMovimientos();
+    } catch (error) {
+      console.error("Error al registrar los movimientos de egreso:", error);
+      setMensaje("Error al registrar los movimientos de egreso.");
     }
   };
 
@@ -393,7 +440,7 @@ const Movimiento: React.FC = () => {
                 <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
-            <form className="space-y-4">
+            <form onSubmit={handleSubmitEgreso} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <input
                   type="text"

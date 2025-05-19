@@ -29,8 +29,14 @@ const Producto: React.FC = () => {
   const obtenerProductos = async () => {
     try {
       const res = await axios.get(API_URL);
-      setProductos(res.data);
-      setTodosLosProductos(res.data);
+
+      // Filtrar productos que NO están eliminados (sin deletedAt)
+      const productosFiltrados = res.data.filter(
+        (producto: any) => !producto.deletedAt
+      );
+
+      setProductos(productosFiltrados);
+      setTodosLosProductos(productosFiltrados);
 
       const mar = await axios.get("http://localhost:4000/marca");
       const cat = await axios.get("http://localhost:4000/categoria");
@@ -43,6 +49,7 @@ const Producto: React.FC = () => {
       console.error("Error al obtener los productos:", error);
     }
   };
+
 
   // Filtra los productos según el texto de búsqueda
   const filtrarProductos = (nombreFiltro: string) => {
