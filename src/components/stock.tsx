@@ -49,6 +49,7 @@ const Stock: React.FC = () => {
     }
   }, [filtroNombre, todosLosProductos]);
 
+  //Parte visible del frontend
   return (
     <motion.div
       className="flex min-h-screen bg-gray-600"

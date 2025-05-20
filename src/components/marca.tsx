@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 const API_URL = "http://localhost:4000/marca";
 
 const Marca: React.FC = () => {
-  // Estados para gestionar los inputs del formulario, lista de marcas y estados de la UI
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [mensaje, setMensaje] = useState("");
@@ -22,6 +21,10 @@ const Marca: React.FC = () => {
   const [filtroNombreEliminadas, setFiltroNombreEliminadas] = useState("");
   const [filtroFechaInicio, setFiltroFechaInicio] = useState("");
   const [filtroFechaFin, setFiltroFechaFin] = useState("");
+  const [mostrarAlertaExito, setMostrarAlertaExito] = useState(false);
+  const [mensajeAlertaExito, setMensajeAlertaExito] = useState("");
+  const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
+  const [mensajeAlertaError, setMensajeAlertaError] = useState("");
 
   // Obtiene todas las marcas activas desde la API
   const obtenerMarcas = async () => {
@@ -88,10 +91,12 @@ const Marca: React.FC = () => {
           nombre,
           descripcion,
         });
-        setMensaje("Marca actualizada con éxito.");
+        setMensajeAlertaExito("Marca actualizada con éxito.");
+        setMostrarAlertaExito(true);
       } else {
         await axios.post(API_URL, { nombre, descripcion });
-        setMensaje("Marca registrada con éxito.");
+        setMensajeAlertaExito("Marca registrada con éxito.");
+        setMostrarAlertaExito(true);
       }
 
       setNombre("");
@@ -102,7 +107,8 @@ const Marca: React.FC = () => {
       obtenerMarcas();
     } catch (error) {
       console.error("Error al registrar/actualizar la marca:", error);
-      setMensaje("Error al registrar/actualizar la marca.");
+      setMensajeAlertaError("Error al registrar/actualizar la marca.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -113,11 +119,13 @@ const Marca: React.FC = () => {
 
     try {
       await axios.delete(`${API_URL}/softDelete/${id}`);
-      alert("Marca eliminada correctamente");
+      setMensajeAlertaExito("Marca eliminada correctamente.");
+      setMostrarAlertaExito(true);
       obtenerMarcas();
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al eliminar la marca");
+      setMensajeAlertaError("Error al eliminar la marca.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -128,12 +136,14 @@ const Marca: React.FC = () => {
 
     try {
       await axios.patch(`${API_URL}/restore/${id}`);
-      alert("Marca restaurada correctamente");
+      setMensajeAlertaExito("Marca restaurada correctamente.");
+      setMostrarAlertaExito(true);
       obtenerMarcas();
       obtenerMarcasEliminadas();
     } catch (error) {
       console.error("Error al restaurar la marca:", error);
-      alert("Error al restaurar la marca");
+      setMensajeAlertaError("Error al restaurar la marca.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -166,6 +176,18 @@ const Marca: React.FC = () => {
     }
   }, [filtroNombre, todasLasMarcas]);
 
+  // Temporizador para cerrar la alerta de éxito después de 3 segundos
+  useEffect(() => {
+    if (mostrarAlertaExito) {
+      const timer = setTimeout(() => {
+        setMostrarAlertaExito(false);
+        setMensajeAlertaExito("");
+      }, 3000); // 3000 ms = 3 segundos
+      return () => clearTimeout(timer); // Limpia el temporizador al desmontar
+    }
+  }, [mostrarAlertaExito]);
+
+  //Parte visible del frontend
   return (
     <motion.div
       className="flex min-h-screen bg-gray-600"
@@ -173,7 +195,7 @@ const Marca: React.FC = () => {
     >
       {/* Sección de Listado de Marcas */}
       <motion.div
-        className="flex-1 p-8 ml-60"
+        className="flex-1 p-8 ml-60 relative flex flex-col"
         layout
         transition={{ duration: 0.2 }}
       >
@@ -197,6 +219,52 @@ const Marca: React.FC = () => {
           </div>
         </div>
 
+        {/* Alerta emergente para el mensaje de éxito */}
+        {mostrarAlertaExito && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+          >
+            <svg className="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Éxito</p>
+              <p className="text-xs">{mensajeAlertaExito}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Alerta emergente para el mensaje de error */}
+        {mostrarAlertaError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+          >
+            <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Error</p>
+              <p className="text-xs">{mensajeAlertaError}</p>
+            </div>
+            <button
+              onClick={() => setMostrarAlertaError(false)}
+              className="text-red-500 hover:text-red-700 focus:outline-none"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </motion.div>
+        )}
+
         <div className="mb-4">
           <input
             type="text"
@@ -207,39 +275,43 @@ const Marca: React.FC = () => {
           />
         </div>
 
-        <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
-          <thead>
-            <tr className="bg-indigo-100">
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Descripción</th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {marcas.map((marca: any) => (
-              <tr
-                key={marca.id}
-                className="hover:bg-gray-200"
-              >
-                <td className="border px-4 py-2 text-sm">{marca.nombre}</td>
-                <td className="border px-4 py-2 text-sm">{marca.descripcion}</td>
-                <td
-                  className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
-                  onClick={() => handleEditarMarca(marca)}
-                >
-                  <PencilSquareIcon className="h-5 w-5 mx-auto" />
-                </td>
-                <td
-                  className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
-                  onClick={() => handleEliminarMarca(marca.id)}
-                >
-                  <TrashIcon className="h-5 w-5 mx-auto" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="flex-1 overflow-hidden">
+          <div className="max-h-[70vh] overflow-y-auto">
+            <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
+              <thead>
+                <tr className="bg-indigo-100 sticky top-0">
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Descripción</th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {marcas.map((marca: any) => (
+                  <tr
+                    key={marca.id}
+                    className="hover:bg-gray-200"
+                  >
+                    <td className="border px-4 py-2 text-sm">{marca.nombre}</td>
+                    <td className="border px-4 py-2 text-sm">{marca.descripcion}</td>
+                    <td
+                      className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
+                      onClick={() => handleEditarMarca(marca)}
+                    >
+                      <PencilSquareIcon className="h-5 w-5 mx-auto" />
+                    </td>
+                    <td
+                      className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
+                      onClick={() => handleEliminarMarca(marca.id)}
+                    >
+                      <TrashIcon className="h-5 w-5 mx-auto" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </motion.div>
 
       {/* Sección de Formulario para Nueva Marca */}
@@ -374,4 +446,4 @@ const Marca: React.FC = () => {
   );
 };
 
-export default Marca;
+export default Marca; 

@@ -7,12 +7,10 @@ import { motion } from "framer-motion";
 const API_URL = "http://localhost:4000/proveedor";
 
 const Proveedor: React.FC = () => {
-  // Estados para gestionar los inputs del formulario, lista de proveedores y estados de la UI
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
   const [telefono, setTelefono] = useState("");
   const [cuit, setCuit] = useState("");
-  const [mensaje, setMensaje] = useState("");
   const [proveedores, setProveedores] = useState([]);
   const [todosLosProveedores, setTodosLosProveedores] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
@@ -24,6 +22,10 @@ const Proveedor: React.FC = () => {
   const [filtroNombreEliminados, setFiltroNombreEliminados] = useState("");
   const [filtroFechaInicio, setFiltroFechaInicio] = useState("");
   const [filtroFechaFin, setFiltroFechaFin] = useState("");
+  const [mostrarAlertaExito, setMostrarAlertaExito] = useState(false);
+  const [mensajeAlertaExito, setMensajeAlertaExito] = useState("");
+  const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
+  const [mensajeAlertaError, setMensajeAlertaError] = useState("");
 
   // Obtiene todos los proveedores activos desde la API
   const obtenerProveedores = async () => {
@@ -33,6 +35,8 @@ const Proveedor: React.FC = () => {
       setTodosLosProveedores(res.data);
     } catch (error) {
       console.error("Error al obtener los proveedores:", error);
+      setMensajeAlertaError("Error al obtener los proveedores.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -40,10 +44,11 @@ const Proveedor: React.FC = () => {
   const obtenerProveedoresEliminados = async () => {
     try {
       const res = await axios.get(`${API_URL}/findSoftDeleted`);
-      console.log(res.data);
       setProveedoresEliminados(res.data);
     } catch (error) {
       console.error("Error al obtener los proveedores eliminados:", error);
+      setMensajeAlertaError("No se pudieron cargar los proveedores eliminados.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -92,7 +97,8 @@ const Proveedor: React.FC = () => {
           telefono: parseInt(telefono),
           cuit: parseInt(cuit),
         });
-        setMensaje("Proveedor actualizado con éxito.");
+        setMensajeAlertaExito("Proveedor actualizado con éxito.");
+        setMostrarAlertaExito(true);
       } else {
         await axios.post(API_URL, {
           nombre,
@@ -100,7 +106,8 @@ const Proveedor: React.FC = () => {
           telefono: parseInt(telefono),
           cuit: parseInt(cuit),
         });
-        setMensaje("Proveedor registrado con éxito.");
+        setMensajeAlertaExito("Proveedor registrado con éxito.");
+        setMostrarAlertaExito(true);
       }
 
       setNombre("");
@@ -113,7 +120,8 @@ const Proveedor: React.FC = () => {
       obtenerProveedores();
     } catch (error) {
       console.error("Error al registrar/actualizar el proveedor:", error);
-      setMensaje("Error al registrar/actualizar el proveedor.");
+      setMensajeAlertaError("Error al registrar/actualizar el proveedor.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -124,11 +132,13 @@ const Proveedor: React.FC = () => {
 
     try {
       await axios.delete(`${API_URL}/softDelete/${id}`);
-      alert("Proveedor eliminado correctamente");
+      setMensajeAlertaExito("Proveedor eliminado correctamente.");
+      setMostrarAlertaExito(true);
       obtenerProveedores();
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error al eliminar el proveedor");
+      console.error("Error al eliminar el proveedor:", error);
+      setMensajeAlertaError("Error al eliminar el proveedor.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -139,12 +149,14 @@ const Proveedor: React.FC = () => {
 
     try {
       await axios.patch(`${API_URL}/restore/${id}`);
-      alert("Proveedor restaurado correctamente");
+      setMensajeAlertaExito("Proveedor restaurado correctamente.");
+      setMostrarAlertaExito(true);
       obtenerProveedores();
       obtenerProveedoresEliminados();
     } catch (error) {
       console.error("Error al restaurar el proveedor:", error);
-      alert("Error al restaurar el proveedor");
+      setMensajeAlertaError("Error al restaurar el proveedor.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -179,21 +191,24 @@ const Proveedor: React.FC = () => {
     }
   }, [filtroNombre, todosLosProveedores]);
 
+  // Temporizador para cerrar la alerta de éxito después de 3 segundos
+  useEffect(() => {
+    if (mostrarAlertaExito) {
+      const timer = setTimeout(() => {
+        setMostrarAlertaExito(false);
+        setMensajeAlertaExito("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [mostrarAlertaExito]);
+
+  //Parte visible del frontend
   return (
-    <motion.div
-      className="flex min-h-screen bg-gray-600"
-      layout
-    >
+    <div className="flex min-h-screen bg-gray-600">
       {/* Sección de Listado de Proveedores */}
-      <motion.div
-        className="flex-1 p-8 ml-60"
-        layout
-        transition={{ duration: 0.2 }}
-      >
+      <div className="flex-1 p-8 ml-60 relative flex flex-col">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-gray-200 mt-2">
-            Listado de Proveedores
-          </h3>
+          <h3 className="font-bold text-gray-200 mt-2">Listado de Proveedores</h3>
           <div className="space-x-2">
             <button
               onClick={() => setMostrarFormulario(true)}
@@ -210,6 +225,52 @@ const Proveedor: React.FC = () => {
           </div>
         </div>
 
+        {/* Alerta emergente para el mensaje de éxito */}
+        {mostrarAlertaExito && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+          >
+            <svg className="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Éxito</p>
+              <p className="text-xs">{mensajeAlertaExito}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Alerta emergente para el mensaje de error */}
+        {mostrarAlertaError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+          >
+            <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Error</p>
+              <p className="text-xs">{mensajeAlertaError}</p>
+            </div>
+            <button
+              onClick={() => setMostrarAlertaError(false)}
+              className="text-red-500 hover:text-red-700 focus:outline-none"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </motion.div>
+        )}
+
         <div className="mb-4">
           <input
             type="text"
@@ -220,44 +281,45 @@ const Proveedor: React.FC = () => {
           />
         </div>
 
-        <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
-          <thead>
-            <tr className="bg-indigo-100">
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Teléfono</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">CUIT</th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {proveedores.map((proveedor: any) => (
-              <tr
-                key={proveedor.id}
-                className="hover:bg-gray-200"
-              >
-                <td className="border px-4 py-2 text-sm">{proveedor.nombre}</td>
-                <td className="border px-4 py-2 text-sm">{proveedor.codigo}</td>
-                <td className="border px-4 py-2 text-sm">{proveedor.telefono}</td>
-                <td className="border px-4 py-2 text-sm">{proveedor.cuit}</td>
-                <td
-                  className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
-                  onClick={() => handleEditarProveedor(proveedor)}
-                >
-                  <PencilSquareIcon className="h-5 w-5 mx-auto" />
-                </td>
-                <td
-                  className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
-                  onClick={() => handleEliminarProveedor(proveedor.id)}
-                >
-                  <TrashIcon className="h-5 w-5 mx-auto" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </motion.div>
+        <div className="flex-1 overflow-hidden">
+          <div className="max-h-[70vh] overflow-y-auto">
+            <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
+              <thead>
+                <tr className="bg-indigo-100 sticky top-0 z-10">
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Teléfono</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">CUIT</th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {proveedores.map((proveedor: any) => (
+                  <tr key={proveedor.id} className="hover:bg-gray-200">
+                    <td className="border px-4 py-2 text-sm">{proveedor.nombre}</td>
+                    <td className="border px-4 py-2 text-sm">{proveedor.codigo}</td>
+                    <td className="border px-4 py-2 text-sm">{proveedor.telefono}</td>
+                    <td className="border px-4 py-2 text-sm">{proveedor.cuit}</td>
+                    <td
+                      className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
+                      onClick={() => handleEditarProveedor(proveedor)}
+                    >
+                      <PencilSquareIcon className="h-5 w-5 mx-auto" />
+                    </td>
+                    <td
+                      className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
+                      onClick={() => handleEliminarProveedor(proveedor.id)}
+                    >
+                      <TrashIcon className="h-5 w-5 mx-auto" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       {/* Sección de Formulario para Nuevo Proveedor */}
       {mostrarFormulario && (
@@ -267,15 +329,11 @@ const Proveedor: React.FC = () => {
           exit={{ opacity: 0, x: 100 }}
           transition={{ duration: 0.2 }}
           className="w-1/4 p-10"
-          layout
         >
           <h2 className="font-bold mb-4 text-center text-gray-200">
             {modoEdicion ? "Editar Proveedor" : "Nuevo Proveedor"}
           </h2>
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4"
-          >
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
               placeholder="Nombre"
@@ -314,9 +372,6 @@ const Proveedor: React.FC = () => {
             >
               {modoEdicion ? "Actualizar" : "Registrar"}
             </button>
-            {mensaje && (
-              <p className="text-green-600">{mensaje}</p>
-            )}
           </form>
         </motion.div>
       )}
@@ -408,7 +463,7 @@ const Proveedor: React.FC = () => {
           </motion.div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 

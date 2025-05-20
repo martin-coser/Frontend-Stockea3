@@ -7,10 +7,8 @@ import { motion } from "framer-motion";
 const API_URL = "http://localhost:4000/categoria";
 
 const Categoria: React.FC = () => {
-  // Estados para gestionar los inputs del formulario, lista de categorías y estados de la UI
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [mensaje, setMensaje] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [todasLasCategorias, setTodasLasCategorias] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
@@ -22,6 +20,10 @@ const Categoria: React.FC = () => {
   const [filtroNombreEliminadas, setFiltroNombreEliminadas] = useState("");
   const [filtroFechaInicio, setFiltroFechaInicio] = useState("");
   const [filtroFechaFin, setFiltroFechaFin] = useState("");
+  const [mostrarAlertaExito, setMostrarAlertaExito] = useState(false);
+  const [mensajeAlertaExito, setMensajeAlertaExito] = useState("");
+  const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
+  const [mensajeAlertaError, setMensajeAlertaError] = useState("");
 
   // Obtiene todas las categorías activas desde la API
   const obtenerCategorias = async () => {
@@ -31,6 +33,8 @@ const Categoria: React.FC = () => {
       setTodasLasCategorias(res.data);
     } catch (error) {
       console.error("Error al obtener las categorías:", error);
+      setMensajeAlertaError("Error al obtener las categorías.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -40,17 +44,9 @@ const Categoria: React.FC = () => {
       const res = await axios.get(`${API_URL}/findSoftDeleted`);
       setCategoriasEliminadas(res.data);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error al obtener las categorías eliminadas:", {
-          message: error.message,
-          status: error.response?.status,
-          data: error.response?.data,
-          config: error.config,
-        });
-      } else {
-        console.error("Error al obtener las categorías eliminadas:", error);
-      }
-      alert("No se pudieron cargar las categorías eliminadas. Por favor, intenta de nuevo.");
+      console.error("Error al obtener las categorías eliminadas:", error);
+      setMensajeAlertaError("No se pudieron cargar las categorías eliminadas.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -98,10 +94,12 @@ const Categoria: React.FC = () => {
           nombre,
           descripcion,
         });
-        setMensaje("Categoría actualizada con éxito.");
+        setMensajeAlertaExito("Categoría actualizada con éxito.");
+        setMostrarAlertaExito(true);
       } else {
         await axios.post(API_URL, { nombre, descripcion });
-        setMensaje("Categoría registrada con éxito.");
+        setMensajeAlertaExito("Categoría registrada con éxito.");
+        setMostrarAlertaExito(true);
       }
 
       setNombre("");
@@ -112,7 +110,8 @@ const Categoria: React.FC = () => {
       obtenerCategorias();
     } catch (error) {
       console.error("Error al registrar/actualizar la categoría:", error);
-      setMensaje("Error al registrar/actualizar la categoría.");
+      setMensajeAlertaError("Error al registrar/actualizar la categoría.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -123,11 +122,13 @@ const Categoria: React.FC = () => {
 
     try {
       await axios.delete(`${API_URL}/softDelete/${id}`);
-      alert("Categoría eliminada correctamente");
+      setMensajeAlertaExito("Categoría eliminada correctamente.");
+      setMostrarAlertaExito(true);
       obtenerCategorias();
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error al eliminar la categoría");
+      console.error("Error al eliminar la categoría:", error);
+      setMensajeAlertaError("Error al eliminar la categoría.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -138,12 +139,14 @@ const Categoria: React.FC = () => {
 
     try {
       await axios.patch(`${API_URL}/restore/${id}`);
-      alert("Categoría restaurada correctamente");
+      setMensajeAlertaExito("Categoría restaurada correctamente.");
+      setMostrarAlertaExito(true);
       obtenerCategorias();
       obtenerCategoriasEliminadas();
     } catch (error) {
       console.error("Error al restaurar la categoría:", error);
-      alert("Error al restaurar la categoría");
+      setMensajeAlertaError("Error al restaurar la categoría.");
+      setMostrarAlertaError(true);
     }
   };
 
@@ -176,21 +179,24 @@ const Categoria: React.FC = () => {
     }
   }, [filtroNombre, todasLasCategorias]);
 
+  // Temporizador para cerrar la alerta de éxito después de 3 segundos
+  useEffect(() => {
+    if (mostrarAlertaExito) {
+      const timer = setTimeout(() => {
+        setMostrarAlertaExito(false);
+        setMensajeAlertaExito("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [mostrarAlertaExito]);
+
+  //Parte visible del frontend
   return (
-    <motion.div
-      className="flex min-h-screen bg-gray-600"
-      layout
-    >
+    <div className="flex min-h-screen bg-gray-600">
       {/* Sección de Listado de Categorías */}
-      <motion.div
-        className="flex-1 p-8 ml-60"
-        layout
-        transition={{ duration: 0.2 }}
-      >
+      <div className="flex-1 p-8 ml-60 relative flex flex-col">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-gray-200 mt-2">
-            Listado de Categorías
-          </h3>
+          <h3 className="font-bold text-gray-200 mt-2">Listado de Categorías</h3>
           <div className="space-x-2">
             <button
               onClick={() => setMostrarFormulario(true)}
@@ -207,6 +213,52 @@ const Categoria: React.FC = () => {
           </div>
         </div>
 
+        {/* Alerta emergente para el mensaje de éxito */}
+        {mostrarAlertaExito && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+          >
+            <svg className="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Éxito</p>
+              <p className="text-xs">{mensajeAlertaExito}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Alerta emergente para el mensaje de error */}
+        {mostrarAlertaError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+          >
+            <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Error</p>
+              <p className="text-xs">{mensajeAlertaError}</p>
+            </div>
+            <button
+              onClick={() => setMostrarAlertaError(false)}
+              className="text-red-500 hover:text-red-700 focus:outline-none"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </motion.div>
+        )}
+
         <div className="mb-4">
           <input
             type="text"
@@ -217,40 +269,41 @@ const Categoria: React.FC = () => {
           />
         </div>
 
-        <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
-          <thead>
-            <tr className="bg-indigo-100">
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Descripción</th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categorias.map((categoria: any) => (
-              <tr
-                key={categoria.id}
-                className="hover:bg-gray-200"
-              >
-                <td className="border px-4 py-2 text-sm">{categoria.nombre}</td>
-                <td className="border px-4 py-2 text-sm">{categoria.descripcion}</td>
-                <td
-                  className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
-                  onClick={() => handleEditarCategoria(categoria)}
-                >
-                  <PencilSquareIcon className="h-5 w-5 mx-auto" />
-                </td>
-                <td
-                  className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
-                  onClick={() => handleEliminarCategoria(categoria.id)}
-                >
-                  <TrashIcon className="h-5 w-5 mx-auto" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </motion.div>
+        <div className="flex-1 overflow-hidden">
+          <div className="max-h-[70vh] overflow-y-auto">
+            <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
+              <thead>
+                <tr className="bg-indigo-100 sticky top-0 z-10">
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Descripción</th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categorias.map((categoria: any) => (
+                  <tr key={categoria.id} className="hover:bg-gray-200">
+                    <td className="border px-4 py-2 text-sm">{categoria.nombre}</td>
+                    <td className="border px-4 py-2 text-sm">{categoria.descripcion}</td>
+                    <td
+                      className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
+                      onClick={() => handleEditarCategoria(categoria)}
+                    >
+                      <PencilSquareIcon className="h-5 w-5 mx-auto" />
+                    </td>
+                    <td
+                      className="border px-4 py-2 text-red-600 text-center cursor-pointer hover:text-red-700"
+                      onClick={() => handleEliminarCategoria(categoria.id)}
+                    >
+                      <TrashIcon className="h-5 w-5 mx-auto" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       {/* Sección de Formulario para Nueva Categoría */}
       {mostrarFormulario && (
@@ -260,15 +313,11 @@ const Categoria: React.FC = () => {
           exit={{ opacity: 0, x: 100 }}
           transition={{ duration: 0.2 }}
           className="w-1/4 p-10"
-          layout
         >
           <h2 className="font-bold mb-4 text-center text-gray-200">
             {modoEdicion ? "Editar Categoría" : "Nueva Categoría"}
           </h2>
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4"
-          >
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
               placeholder="Nombre"
@@ -290,9 +339,6 @@ const Categoria: React.FC = () => {
             >
               {modoEdicion ? "Actualizar" : "Registrar"}
             </button>
-            {mensaje && (
-              <p className="text-green-600">{mensaje}</p>
-            )}
           </form>
         </motion.div>
       )}
@@ -380,7 +426,7 @@ const Categoria: React.FC = () => {
           </motion.div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 

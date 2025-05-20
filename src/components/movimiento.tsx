@@ -1,19 +1,20 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import { EyeIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, XMarkIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 const API_URL = "http://localhost:4000/movimiento";
 const PRODUCTOS_API_URL = "http://localhost:4000/producto";
 
 const Movimiento: React.FC = () => {
-  // Estados para gestionar los inputs del formulario, lista de movimientos y estados de la UI
   const [nombre, setNombre] = useState("");
-  const [mensaje, setMensaje] = useState("");
   const [movimientos, setMovimientos] = useState([]);
   const [todosLosMovimientos, setTodosLosMovimientos] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
-  // Estados para el modal de ingreso
+  const [filtroFechaInicio, setFiltroFechaInicio] = useState("");
+  const [filtroFechaFin, setFiltroFechaFin] = useState("");
+  const [filtroTipoMovimiento, setFiltroTipoMovimiento] = useState("");
+  const [filtroProducto, setFiltroProducto] = useState("");
   const [mostrarModalIngreso, setMostrarModalIngreso] = useState(false);
   const [costo, setCosto] = useState("");
   const [productos, setProductos] = useState<any[]>([]);
@@ -21,11 +22,17 @@ const Movimiento: React.FC = () => {
   const [productosSeleccionados, setProductosSeleccionados] = useState<number[]>([]);
   const [cantidades, setCantidades] = useState<{ [key: number]: string }>({});
   const [filtroProductos, setFiltroProductos] = useState("");
-  // Estado para el modal de ver movimiento
   const [mostrarModalVer, setMostrarModalVer] = useState(false);
   const [movimientoSeleccionado, setMovimientoSeleccionado] = useState<any | null>(null);
-  // Estado para el modal de egreso
   const [mostrarModalEgreso, setMostrarModalEgreso] = useState(false);
+  const [mostrarAlertaIngreso, setMostrarAlertaIngreso] = useState(false);
+  const [mensajeAlertaIngreso, setMensajeAlertaIngreso] = useState("");
+  const [mostrarAlertaEgreso, setMostrarAlertaEgreso] = useState(false);
+  const [mensajeAlertaEgreso, setMensajeAlertaEgreso] = useState("");
+  const [mostrarAlertaExitoIngreso, setMostrarAlertaExitoIngreso] = useState(false);
+  const [mensajeAlertaExitoIngreso, setMensajeAlertaExitoIngreso] = useState("");
+  const [mostrarAlertaExitoEgreso, setMostrarAlertaExitoEgreso] = useState(false);
+  const [mensajeAlertaExitoEgreso, setMensajeAlertaExitoEgreso] = useState("");
 
   // Obtiene todos los movimientos desde la API
   const obtenerMovimientos = async () => {
@@ -42,7 +49,6 @@ const Movimiento: React.FC = () => {
   const obtenerProductos = async () => {
     try {
       const res = await axios.get(PRODUCTOS_API_URL);
-      // Filtrar productos que NO están eliminados (sin deletedAt)
       const productosFiltrados = res.data.filter(
         (producto: any) => !producto.deletedAt
       );
@@ -53,11 +59,54 @@ const Movimiento: React.FC = () => {
     }
   };
 
-  // Filtra los movimientos según el texto de búsqueda
-  const filtrarMovimientos = (nombreFiltro: string) => {
-    const resultado = todosLosMovimientos.filter((movimiento: any) =>
-      movimiento.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())
-    );
+  // Filtra los movimientos según los criterios de búsqueda
+  const filtrarMovimientos = () => {
+    let resultado = [...todosLosMovimientos];
+
+    // Filtro por nombre
+    if (filtroNombre.trim()) {
+      resultado = resultado.filter((movimiento: any) =>
+        movimiento.nombre.toLowerCase().includes(filtroNombre.toLowerCase())
+      );
+    }
+
+    // Filtro por rango de fechas
+    if (filtroFechaInicio && filtroFechaFin) {
+      const fechaInicio = new Date(filtroFechaInicio);
+      const fechaFin = new Date(filtroFechaFin);
+      fechaFin.setHours(23, 59, 59, 999);
+      resultado = resultado.filter((movimiento: any) => {
+        const fechaMovimiento = new Date(movimiento.fecha);
+        return fechaMovimiento >= fechaInicio && fechaMovimiento <= fechaFin;
+      });
+    } else if (filtroFechaInicio) {
+      const fechaInicio = new Date(filtroFechaInicio);
+      resultado = resultado.filter((movimiento: any) => {
+        const fechaMovimiento = new Date(movimiento.fecha);
+        return fechaMovimiento >= fechaInicio;
+      });
+    } else if (filtroFechaFin) {
+      const fechaFin = new Date(filtroFechaFin);
+      fechaFin.setHours(23, 59, 59, 999);
+      resultado = resultado.filter((movimiento: any) => {
+        const fechaMovimiento = new Date(movimiento.fecha);
+        return fechaMovimiento <= fechaFin;
+      });
+    }
+
+    // Filtro por tipo de movimiento
+    if (filtroTipoMovimiento) {
+      const tipo = parseInt(filtroTipoMovimiento);
+      resultado = resultado.filter((movimiento: any) => movimiento.tipoMovimiento === tipo);
+    }
+
+    // Filtro por producto
+    if (filtroProducto.trim()) {
+      resultado = resultado.filter((movimiento: any) =>
+        movimiento.producto?.nombre.toLowerCase().includes(filtroProducto.toLowerCase())
+      );
+    }
+
     setMovimientos(resultado);
   };
 
@@ -69,123 +118,142 @@ const Movimiento: React.FC = () => {
     setProductos(resultado);
   };
 
+  // Limpia todos los filtros
+  const limpiarFiltros = () => {
+    setFiltroNombre("");
+    setFiltroFechaInicio("");
+    setFiltroFechaFin("");
+    setFiltroTipoMovimiento("");
+    setFiltroProducto("");
+    setMovimientos(todosLosMovimientos);
+  };
+
   // Maneja el envío del formulario del modal de ingreso
   const handleSubmitIngreso = async (e: FormEvent) => {
     e.preventDefault();
     if (!costo || !nombre || productosSeleccionados.length === 0) {
-      setMensaje("Todos los campos son obligatorios y debe seleccionar al menos un producto.");
+      setMensajeAlertaIngreso("Todos los campos son obligatorios y debe seleccionar al menos un producto.");
+      setMostrarAlertaIngreso(true);
       return;
     }
 
-    // Validar que todos los productos seleccionados tengan una cantidad válida
     for (const id of productosSeleccionados) {
       if (!cantidades[id] || parseInt(cantidades[id]) <= 0) {
-        setMensaje("Debe especificar una cantidad válida para cada producto seleccionado.");
+        setMensajeAlertaIngreso("Debe especificar una cantidad válida para cada producto seleccionado.");
+        setMostrarAlertaIngreso(true);
         return;
       }
     }
 
     try {
-      // Calcular la suma total de las cantidades
       const totalCantidades = productosSeleccionados.reduce(
         (sum, id) => sum + parseInt(cantidades[id]),
         0
       );
       if (totalCantidades <= 0) {
-        setMensaje("La suma total de las cantidades debe ser mayor que cero.");
+        setMensajeAlertaIngreso("La suma total de las cantidades debe ser mayor que cero.");
+        setMostrarAlertaIngreso(true);
         return;
       }
 
-      // Parsear el costo total
       const costoTotal = parseFloat(costo);
       if (isNaN(costoTotal) || costoTotal <= 0) {
-        setMensaje("El costo debe ser un número válido mayor que cero.");
+        setMensajeAlertaIngreso("El costo debe ser un número válido mayor que cero.");
+        setMostrarAlertaIngreso(true);
         return;
       }
 
-      // Crear un movimiento por cada producto seleccionado
       for (const id of productosSeleccionados) {
         const cantidad = parseInt(cantidades[id]);
-        // Calcular el costo proporcional: (cantidad / totalCantidades) * costoTotal
         const costoProporcional = (cantidad / totalCantidades) * costoTotal;
         const movimiento = {
           nombre,
-          tipoMovimiento: 0, // 0 para INGRESO
+          tipoMovimiento: 0,
           costo: costoProporcional,
           producto: id,
           cantidad,
         };
-        console.log("JSON del movimiento a enviar:", JSON.stringify(movimiento, null, 2));
         await axios.post(API_URL, movimiento);
       }
-      setMensaje("Movimientos de ingreso registrados con éxito.");
+      setMensajeAlertaExitoIngreso("Movimientos de ingreso registrados con éxito.");
+      setMostrarAlertaExitoIngreso(true);
       setCosto("");
       setNombre("");
       setProductosSeleccionados([]);
       setCantidades({});
       setFiltroProductos("");
+      setMostrarAlertaIngreso(false);
+      setMensajeAlertaIngreso("");
       setMostrarModalIngreso(false);
       obtenerMovimientos();
     } catch (error) {
       console.error("Error al registrar los movimientos de ingreso:", error);
-      setMensaje("Error al registrar los movimientos de ingreso.");
+      setMensajeAlertaIngreso("Error al registrar los movimientos de ingreso.");
+      setMostrarAlertaIngreso(true);
     }
   };
 
-    // Maneja el envío del formulario del modal de egreso
+  // Maneja el envío del formulario del modal de egreso
   const handleSubmitEgreso = async (e: FormEvent) => {
     e.preventDefault();
     if (!nombre || productosSeleccionados.length === 0) {
-      setMensaje("Todos los campos son obligatorios y debe seleccionar al menos un producto.");
+      setMensajeAlertaEgreso("Todos los campos son obligatorios y debe seleccionar al menos un producto.");
+      setMostrarAlertaEgreso(true);
       return;
     }
 
-    // Validar que todos los productos seleccionados tengan una cantidad válida
     for (const id of productosSeleccionados) {
       if (!cantidades[id] || parseInt(cantidades[id]) <= 0) {
-        setMensaje("Debe especificar una cantidad válida para cada producto seleccionado.");
+        setMensajeAlertaEgreso("Debe especificar una cantidad válida para cada producto seleccionado.");
+        setMostrarAlertaEgreso(true);
         return;
       }
     }
 
     try {
-      // Calcular la suma total de las cantidades
       const totalCantidades = productosSeleccionados.reduce(
         (sum, id) => sum + parseInt(cantidades[id]),
         0
       );
       if (totalCantidades <= 0) {
-        setMensaje("La suma total de las cantidades debe ser mayor que cero.");
+        setMensajeAlertaEgreso("La suma total de las cantidades debe ser mayor que cero.");
+        setMostrarAlertaEgreso(true);
         return;
       }
 
-      // Crear un movimiento por cada producto seleccionado
       for (const id of productosSeleccionados) {
         const cantidad = parseInt(cantidades[id]);
         const movimiento = {
           nombre,
-          tipoMovimiento: 1, // 1 para EGRESO
+          tipoMovimiento: 1,
           producto: id,
           cantidad,
         };
-        console.log("JSON del movimiento a enviar:", JSON.stringify(movimiento, null, 2));
         await axios.post(API_URL, movimiento);
       }
-      setMensaje("Movimientos de egreso registrados con éxito.");
+      setMensajeAlertaExitoEgreso("Movimientos de egreso registrados con éxito.");
+      setMostrarAlertaExitoEgreso(true);
       setCosto("");
       setNombre("");
       setProductosSeleccionados([]);
       setCantidades({});
       setFiltroProductos("");
+      setMostrarAlertaEgreso(false);
+      setMensajeAlertaEgreso("");
       setMostrarModalEgreso(false);
       obtenerMovimientos();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al registrar los movimientos de egreso:", error);
-      setMensaje("Error al registrar los movimientos de egreso.");
+      if (error.response && error.response.status === 400) {
+        setMensajeAlertaEgreso("No hay suficiente stock para registrar este egreso.");
+      } else {
+        setMensajeAlertaEgreso("Error al registrar los movimientos de egreso.");
+      }
+      setMostrarAlertaEgreso(true);
     }
   };
 
-  // Maneja la visualización de un movimiento (acción para el botón Ver)
+  // Maneja la visualización de un movimiento
   const handleVerMovimiento = (movimiento: any) => {
     setMovimientoSeleccionado(movimiento);
     setMostrarModalVer(true);
@@ -206,20 +274,16 @@ const Movimiento: React.FC = () => {
     }));
   };
 
-  // Efectos para la carga inicial de datos y filtrado
+  // Efectos para la carga inicial de datos
   useEffect(() => {
     obtenerMovimientos();
     obtenerProductos();
   }, []);
 
-  // Actualiza los movimientos mostrados según el filtro de búsqueda
+  // Actualiza los movimientos mostrados según los filtros
   useEffect(() => {
-    if (filtroNombre.trim() === "") {
-      setMovimientos(todosLosMovimientos);
-    } else {
-      filtrarMovimientos(filtroNombre);
-    }
-  }, [filtroNombre, todosLosMovimientos]);
+    filtrarMovimientos();
+  }, [filtroNombre, filtroFechaInicio, filtroFechaFin, filtroTipoMovimiento, filtroProducto, todosLosMovimientos]);
 
   // Actualiza los productos mostrados en el modal según el filtro
   useEffect(() => {
@@ -237,6 +301,8 @@ const Movimiento: React.FC = () => {
     setProductosSeleccionados([]);
     setCantidades({});
     setFiltroProductos("");
+    setMostrarAlertaIngreso(false);
+    setMensajeAlertaIngreso("");
     setMostrarModalIngreso(true);
   };
 
@@ -247,13 +313,38 @@ const Movimiento: React.FC = () => {
     setProductosSeleccionados([]);
     setCantidades({});
     setFiltroProductos("");
+    setMostrarAlertaEgreso(false);
+    setMensajeAlertaEgreso("");
     setMostrarModalEgreso(true);
   };
 
+  // Temporizador para cerrar la alerta de éxito de ingreso
+  useEffect(() => {
+    if (mostrarAlertaExitoIngreso) {
+      const timer = setTimeout(() => {
+        setMostrarAlertaExitoIngreso(false);
+        setMensajeAlertaExitoIngreso("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [mostrarAlertaExitoIngreso]);
+
+  // Temporizador para cerrar la alerta de éxito de egreso
+  useEffect(() => {
+    if (mostrarAlertaExitoEgreso) {
+      const timer = setTimeout(() => {
+        setMostrarAlertaExitoEgreso(false);
+        setMensajeAlertaExitoEgreso("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [mostrarAlertaExitoEgreso]);
+
+  // Parte visible del frontend
+  // Renderiza la tabla de movimientos y los modales
   return (
-    <motion.div className="flex min-h-screen bg-gray-600" layout>
-      {/* Sección de Listado de Movimientos */}
-      <motion.div className="flex-1 p-8 ml-60" layout transition={{ duration: 0.2 }}>
+    <div className="flex min-h-screen bg-gray-600">
+      <div className="flex-1 p-8 ml-60 relative flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-gray-200 mt-2">Listado de Movimientos</h3>
           <div className="flex gap-2">
@@ -272,47 +363,148 @@ const Movimiento: React.FC = () => {
           </div>
         </div>
 
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Filtrar por nombre..."
-            value={filtroNombre}
-            onChange={(e) => setFiltroNombre(e.target.value)}
-            className="w-1/2 p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
-          />
+        {/* Alertas de éxito de ingreso */}
+        {mostrarAlertaExitoIngreso && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+          >
+            <svg className="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Éxito</p>
+              <p className="text-xs">{mensajeAlertaExitoIngreso}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Alerta de éxito de egreso */}
+        {mostrarAlertaExitoEgreso && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="absolute top-3 left-1/4 transform -translate-x-1/2 w-3/5 max-w-sm bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+          >
+            <svg className="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium">Éxito</p>
+              <p className="text-xs">{mensajeAlertaExitoEgreso}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Filtros de búsqueda */}
+        <div className="mb-4 p-4 bg-gray-500 rounded-lg shadow-md">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Nombre</label>
+              <input
+                type="text"
+                placeholder="Filtrar por nombre..."
+                value={filtroNombre}
+                onChange={(e) => setFiltroNombre(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Desde</label>
+              <input
+                type="date"
+                value={filtroFechaInicio}
+                onChange={(e) => setFiltroFechaInicio(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Hasta</label>
+              <input
+                type="date"
+                value={filtroFechaFin}
+                onChange={(e) => setFiltroFechaFin(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Tipo Movimiento</label>
+              <select
+                value={filtroTipoMovimiento}
+                onChange={(e) => setFiltroTipoMovimiento(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              >
+                <option value="">Todo</option>
+                <option value="0">Ingreso</option>
+                <option value="1">Egreso</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Producto</label>
+              <input
+                type="text"
+                placeholder="Filtrar por producto..."
+                value={filtroProducto}
+                onChange={(e) => setFiltroProducto(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={limpiarFiltros}
+                className="w-full py-2 px-4 bg-gray-600 text-white rounded-lg border border-gray-600 hover:bg-gray-700 focus:ring-1 focus:ring-gray-300 transition"
+              >
+                Limpiar Filtros
+              </button>
+            </div>
+          </div>
         </div>
 
-        <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
-          <thead>
-            <tr className="bg-indigo-100">
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Código Movimiento</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Tipo Movimiento</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
-              <th className="border px-4 py-2 text-left text-sm font-semibold">Fecha</th>
-              <th className="border px-4 py-2 text-center text-sm font-semibold">Ver</th>
-            </tr>
-          </thead>
-          <tbody>
-            {movimientos.map((movimiento: any) => (
-              <tr key={movimiento.id} className="hover:bg-gray-200">
-                <td className="border px-4 py-2 text-sm">{movimiento.codigo}</td>
-                <td className="border px-4 py-2 text-sm">
-                  {movimiento.tipoMovimiento === 0 ? "Ingreso" : "Egreso"}
-                </td>
-                <td className="border px-4 py-2 text-sm">{movimiento.nombre}</td>
-                <td className="border px-4 py-2 text-sm">{movimiento.fecha.split("T")[0]}</td>
-                <td
-                  className="border px-4 py-2 text-green-600 text-center cursor-pointer hover:text-green-700"
-                  onClick={() => handleVerMovimiento(movimiento)}
-                >
-                  <EyeIcon className="h-5 w-5 mx-auto" />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </motion.div>
-      
+        {/* Tabla de movimientos */}
+        <div className="flex-1 overflow-hidden">
+          <div className="max-h-[55vh] overflow-y-auto">
+            <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
+              <thead>
+                <tr className="bg-indigo-100 sticky top-0">
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Código Movimiento</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Tipo Movimiento</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Fecha</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Producto</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">Proveedor</th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">Ver</th>
+                </tr>
+              </thead>
+              <tbody>
+                {movimientos.map((movimiento: any) => (
+                  <tr key={movimiento.id} className="hover:bg-gray-200">
+                    <td className="border px-4 py-2 text-sm">{movimiento.codigo}</td>
+                    <td className="border px-4 py-2 text-sm">
+                      {movimiento.tipoMovimiento === 0 ? "Ingreso" : "Egreso"}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">{movimiento.nombre}</td>
+                    <td className="border px-4 py-2 text-sm">{movimiento.fecha.split("T")[0]}</td>
+                    <td className="border px-4 py-2 text-sm">{movimiento.producto?.nombre || "N/A"}</td>
+                    <td className="border px-4 py-2 text-sm">{movimiento.producto?.proveedor?.nombre || "N/A"}</td>
+                    <td
+                      className="border px-4 py-2 text-green-600 text-center cursor-pointer hover:text-green-700"
+                      onClick={() => handleVerMovimiento(movimiento)}
+                    >
+                      <EyeIcon className="h-5 w-5 mx-auto" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       {/* Modal para Registrar Ingreso */}
       {mostrarModalIngreso && (
         <motion.div
@@ -325,12 +517,16 @@ const Movimiento: React.FC = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            className="bg-gray-600 p-6 rounded-lg shadow-lg w-3/4 max-w-4xl"
+            className="bg-gray-600 p-6 rounded-lg shadow-lg w-3/4 max-w-4xl relative"
           >
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold text-gray-200 text-xl">Registrar Ingreso</h2>
               <button
-                onClick={() => setMostrarModalIngreso(false)}
+                onClick={() => {
+                  setMostrarModalIngreso(false);
+                  setMostrarAlertaIngreso(false);
+                  setMensajeAlertaIngreso("");
+                }}
                 className="text-gray-200 hover:text-gray-400"
               >
                 <XMarkIcon className="h-6 w-6" />
@@ -417,8 +613,29 @@ const Movimiento: React.FC = () => {
               >
                 Registrar Movimiento
               </button>
-              {mensaje && <p className="text-green-600">{mensaje}</p>}
             </form>
+
+            {mostrarAlertaIngreso && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="absolute top-3 left-1/2 transform -translate-x-1/2 w-3/5 max-w-sm bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+              >
+                <ExclamationCircleIcon className="h-5 w-5 text-red-400" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Error</p>
+                  <p className="text-xs">{mensajeAlertaIngreso}</p>
+                </div>
+                <button
+                  onClick={() => setMostrarAlertaIngreso(false)}
+                  className="text-red-500 hover:text-red-700 focus:outline-none"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
       )}
@@ -435,12 +652,16 @@ const Movimiento: React.FC = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            className="bg-gray-600 p-6 rounded-lg shadow-lg w-3/4 max-w-4xl"
+            className="bg-gray-600 p-6 rounded-lg shadow-lg w-3/4 max-w-4xl relative"
           >
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold text-gray-200 text-xl">Registrar Egreso</h2>
               <button
-                onClick={() => setMostrarModalEgreso(false)}
+                onClick={() => {
+                  setMostrarModalEgreso(false);
+                  setMostrarAlertaEgreso(false);
+                  setMensajeAlertaEgreso("");
+                }}
                 className="text-gray-200 hover:text-gray-400"
               >
                 <XMarkIcon className="h-6 w-6" />
@@ -476,6 +697,7 @@ const Movimiento: React.FC = () => {
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Categoría</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Proveedor</th>
+                        <th className="border px-4 py-2 text-left text-sm font-semibold">Stock</th>
                         <th className="border px-4 py-2 text-left text-sm font-semibold">Cantidad</th>
                       </tr>
                     </thead>
@@ -494,6 +716,7 @@ const Movimiento: React.FC = () => {
                           <td className="border px-4 py-2 text-sm">{producto.codigo}</td>
                           <td className="border px-4 py-2 text-sm">{producto.categoria.nombre}</td>
                           <td className="border px-4 py-2 text-sm">{producto.proveedor.nombre}</td>
+                          <td className="border px-4 py-2 text-sm">{producto.stock || 0}</td>
                           <td className="border px-4 py-2 text-sm">
                             <input
                               type="number"
@@ -518,6 +741,28 @@ const Movimiento: React.FC = () => {
                 Registrar Movimiento
               </button>
             </form>
+
+            {mostrarAlertaEgreso && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="absolute top-3 left-1/2 transform -translate-x-1/2 w-3/5 max-w-sm bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
+              >
+                <ExclamationCircleIcon className="h-5 w-5 text-red-400" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">Error</p>
+                  <p className="text-xs">{mensajeAlertaEgreso}</p>
+                </div>
+                <button
+                  onClick={() => setMostrarAlertaEgreso(false)}
+                  className="text-red-500 hover:text-red-700 focus:outline-none"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
       )}
@@ -622,7 +867,7 @@ const Movimiento: React.FC = () => {
           </motion.div>
         </motion.div>
       )}
-    </motion.div>
+    </div>
   );
 };
 
