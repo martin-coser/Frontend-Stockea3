@@ -838,6 +838,16 @@ const Movimiento: React.FC = () => {
                   <p><strong className="font-medium">Producto:</strong> {movimientoSeleccionado.producto.nombre}</p>
                 </div>
               )}
+              {movimientoSeleccionado.producto.proveedor.nombre && (
+                <div className="flex items-center space-x-3">
+                  <span className="text-indigo-500 dark:text-indigo-400">
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </span>
+                  <p><strong className="font-medium">Proveedor:</strong> {movimientoSeleccionado.producto.proveedor.nombre}</p>
+                </div>
+              )}
               {movimientoSeleccionado.cantidad && (
                 <div className="flex items-center space-x-3">
                   <span className="text-indigo-500 dark:text-indigo-400">
