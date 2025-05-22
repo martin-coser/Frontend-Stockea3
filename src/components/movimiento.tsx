@@ -458,7 +458,7 @@ const Movimiento: React.FC = () => {
             <div className="flex items-end">
               <button
                 onClick={limpiarFiltros}
-                className="w-full py-2 px-4 bg-gray-600 text-white rounded-lg border border-gray-600 hover:bg-gray-700 focus:ring-1 focus:ring-gray-300 transition"
+                className="w-full py-1.5 px-4 bg-indigo-500 text-white rounded-lg border border-gray-600 hover:bg-indigo-700 focus:ring-1 focus:ring-gray-500 transition"
               >
                 Limpiar Filtros
               </button>

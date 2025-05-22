@@ -9,6 +9,12 @@ const Stock: React.FC = () => {
   const [productos, setProductos] = useState([]);
   const [todosLosProductos, setTodosLosProductos] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroMarca, setFiltroMarca] = useState("");
+  const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [filtroProveedor, setFiltroProveedor] = useState("");
+  const [marcasDisponibles, setMarcasDisponibles] = useState<{ id: string; nombre: string }[]>([]);
+  const [categoriasDisponibles, setCategoriasDisponibles] = useState<{ id: string; nombre: string }[]>([]);
+  const [proveedoresDisponibles, setProveedoresDisponibles] = useState<{ id: string; nombre: string }[]>([]);
 
 
   // Obtiene todos los productos
@@ -22,17 +28,49 @@ const Stock: React.FC = () => {
       );
       setProductos(productosFiltrados);
       setTodosLosProductos(productosFiltrados);
+      const mar = await axios.get("http://localhost:4000/marca");
+      const cat = await axios.get("http://localhost:4000/categoria");
+      const pro = await axios.get("http://localhost:4000/proveedor");
+
+      setMarcasDisponibles(mar.data);
+      setCategoriasDisponibles(cat.data);
+      setProveedoresDisponibles(pro.data);
     } catch (error) {
       console.error("Error al obtener los productos:", error);
     }
   };
 
-  // Filtra los productos según el texto de búsqueda
-  const filtrarProductos = (nombreFiltro: string) => {
-    const resultado = todosLosProductos.filter((producto: any) =>
-      producto.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())
-    );
+  // Filtra los productos según los filtros activos
+  const filtrarProductos = (
+    nombreFiltro: string,
+    marcaFiltro: string,
+    categoriaFiltro: string,
+    proveedorFiltro: string
+  ) => {
+    const resultado = todosLosProductos.filter((producto: any) => {
+      const coincideNombre = nombreFiltro
+        ? producto.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())
+        : true;
+      const coincideMarca = marcaFiltro
+        ? producto.marca.id === parseInt(marcaFiltro)
+        : true;
+      const coincideCategoria = categoriaFiltro
+        ? producto.categoria.id === parseInt(categoriaFiltro)
+        : true;
+      const coincideProveedor = proveedorFiltro
+        ? producto.proveedor.id === parseInt(proveedorFiltro)
+        : true;
+      return coincideNombre && coincideMarca && coincideCategoria && coincideProveedor;
+    });
     setProductos(resultado);
+  };
+
+    // Limpia todos los filtros
+  const limpiarFiltros = () => {
+    setFiltroNombre("");
+    setFiltroMarca("");
+    setFiltroCategoria("");
+    setFiltroProveedor("");
   };
 
   // Efectos para la carga inicial de datos y filtrado
@@ -40,43 +78,92 @@ const Stock: React.FC = () => {
     obtenerProductos();
   }, []);
 
-  // Actualiza los productos mostrados según el filtro de búsqueda
+  // Actualiza los productos mostrados según los filtros
   useEffect(() => {
-    if (filtroNombre.trim() === "") {
-      setProductos(todosLosProductos);
-    } else {
-      filtrarProductos(filtroNombre);
-    }
-  }, [filtroNombre, todosLosProductos]);
+    filtrarProductos(filtroNombre, filtroMarca, filtroCategoria, filtroProveedor);
+  }, [filtroNombre, filtroMarca, filtroCategoria, filtroProveedor, todosLosProductos]);
 
   //Parte visible del frontend
   return (
-    <motion.div
-      className="flex min-h-screen bg-gray-600"
-      layout
-    >
+    <div className="flex min-h-screen bg-gray-600">
       {/* Sección de Listado de Productos */}
-      <motion.div
-        className="flex-1 p-8 ml-60"
-        layout
-        transition={{ duration: 0.2 }}
-      >
+      <div className="flex-1 p-8 ml-60 relative flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-gray-200 mt-2">
             Listado de Productos
           </h3>
         </div>
 
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Filtrar por nombre..."
-            value={filtroNombre}
-            onChange={(e) => setFiltroNombre(e.target.value)}
-            className="w-1/2 p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
-          />
+        {/* Contenedor de filtros */}
+        <div className="mb-4 bg-gray-500 p-4 rounded-lg shadow-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Nombre</label>
+              <input
+                type="text"
+                placeholder="Filtrar por nombre..."
+                value={filtroNombre}
+                onChange={(e) => setFiltroNombre(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Marca</label>
+              <select
+                value={filtroMarca}
+                onChange={(e) => setFiltroMarca(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              >
+                <option value="">Todas las marcas</option>
+                {marcasDisponibles.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Categoría</label>
+              <select
+                value={filtroCategoria}
+                onChange={(e) => setFiltroCategoria(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              >
+                <option value="">Todas las categorías</option>
+                {categoriasDisponibles.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-200 mb-1">Proveedor</label>
+              <select
+                value={filtroProveedor}
+                onChange={(e) => setFiltroProveedor(e.target.value)}
+                className="w-full p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
+              >
+                <option value="">Todos los proveedores</option>
+                {proveedoresDisponibles.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <button
+                onClick={limpiarFiltros}
+                className="w-full py-1.5 px-4 bg-indigo-500 text-white rounded-lg  hover:bg-indigo-700 focus:ring-1 focus:ring-gray-500 transition"
+              >
+                Limpiar Filtros
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="max-h-[75vh] overflow-y-auto">
+
+        <div className="max-h-[68vh] overflow-y-auto">
           <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
             <thead>
               <tr className="bg-indigo-100">
@@ -108,8 +195,8 @@ const Stock: React.FC = () => {
           </table>
         </div>
 
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
