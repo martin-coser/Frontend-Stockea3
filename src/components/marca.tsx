@@ -34,6 +34,13 @@ const Marca: React.FC = () => {
     setMostrarAlertaConfirmacionEliminacion,
   ] = useState(false);
   const [idMarcaAEliminar, setIdMarcaAEliminar] = useState<number | null>(null);
+  const [
+    mostrarAlertaConfirmacionRestauracion,
+    setMostrarAlertaConfirmacionRestauracion,
+  ] = useState(false);
+  const [idMarcaARestaurar, setIdMarcaARestaurar] = useState<number | null>(
+    null
+  );
 
   // Obtiene todas las marcas activas desde la API
   const obtenerMarcas = async () => {
@@ -135,9 +142,7 @@ const Marca: React.FC = () => {
     if (idMarcaAEliminar === null) return; // No hay ID para eliminar
 
     try {
-      await axios.delete(
-        `${API_URL}/softDelete/${idMarcaAEliminar}`
-      );
+      await axios.delete(`${API_URL}/softDelete/${idMarcaAEliminar}`);
       setMensajeAlertaExito("Marca eliminada correctamente.");
       setMostrarAlertaExito(true);
       obtenerMarcas();
@@ -153,21 +158,29 @@ const Marca: React.FC = () => {
 
   // Restaura una marca eliminada
   const handleRestaurarMarca = async (id: number) => {
-    const confirmacion = window.confirm(
-      "¿Estás seguro que querés restaurar esta marca?"
-    );
-    if (!confirmacion) return;
+    setIdMarcaARestaurar(id);
+    setMostrarAlertaConfirmacionRestauracion(true);
+  };
+  const confirmarRestaurarMarca = async () => {
+    if (idMarcaARestaurar === null) {
+      console.error("No hay ID de marca para restaurar.");
+      setMostrarAlertaConfirmacionRestauracion(false);
+      return;
+    }
 
     try {
-      await axios.patch(`${API_URL}/restore/${id}`);
+      await axios.patch(`${API_URL}/restore/${idMarcaARestaurar}`);
       setMensajeAlertaExito("Marca restaurada correctamente.");
       setMostrarAlertaExito(true);
-      obtenerMarcas();
-      obtenerMarcasEliminadas();
+      obtenerMarcas(); // Refresca la lista de marcas activas
+      obtenerMarcasEliminadas(); // Opcional: refresca el historial si el modal está abierto
     } catch (error) {
       console.error("Error al restaurar la marca:", error);
       setMensajeAlertaError("Error al restaurar la marca.");
       setMostrarAlertaError(true);
+    } finally {
+      setMostrarAlertaConfirmacionRestauracion(false); // Cierra el modal de confirmación
+      setIdMarcaARestaurar(null); // Limpia el ID
     }
   };
 
@@ -357,7 +370,41 @@ const Marca: React.FC = () => {
             className="w-1/2 p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
           />
         </div>
-
+        {/* Alerta de confirmación de restauración */}
+        {mostrarAlertaConfirmacionRestauracion && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+              <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
+                Confirmación de Restauración
+              </h2>
+              <p className="text-center text-gray-700 mb-6">
+                ¿Estás seguro que querés restaurar esta marca?
+              </p>
+              <div className="flex justify-around space-x-4">
+                <button
+                  onClick={confirmarRestaurarMarca}
+                  className="py-2 px-6 bg-green-500 text-white rounded-lg border border-green-500 hover:bg-green-600 focus:ring-1 focus:ring-green-300 transition"
+                >
+                  Aceptar
+                </button>
+                <button
+                  onClick={() => {
+                    setMostrarAlertaConfirmacionRestauracion(false);
+                    setIdMarcaARestaurar(null);
+                  }}
+                  className="py-2 px-6 bg-gray-300 text-gray-800 rounded-lg border border-gray-300 hover:bg-gray-400 focus:ring-1 focus:ring-gray-200 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
         <div className="flex-1 overflow-hidden">
           <div className="max-h-[70vh] overflow-y-auto">
             <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
@@ -450,7 +497,7 @@ const Marca: React.FC = () => {
 
       {/* Modal para Historial de Eliminaciones */}
       {mostrarHistorial && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}

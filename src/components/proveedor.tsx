@@ -39,6 +39,8 @@ const Proveedor: React.FC = () => {
   const [idProveedorAEliminar, setIdProveedorAEliminar] = useState<
     number | null
   >(null);
+  const [mostrarAlertaConfirmacionRestauracion, setMostrarAlertaConfirmacionRestauracion] = useState(false);
+  const [idProveedorARestaurar, setIdProveedorARestaurar] = useState<number | null>(null);
 
   // Obtiene todos los proveedores activos desde la API
   const obtenerProveedores = async () => {
@@ -174,21 +176,29 @@ const Proveedor: React.FC = () => {
   };
   // Restaura un proveedor eliminado
   const handleRestaurarProveedor = async (id: number) => {
-    const confirmacion = window.confirm(
-      "¿Estás seguro que querés restaurar este proveedor?"
-    );
-    if (!confirmacion) return;
+    setIdProveedorARestaurar(id);
+    setMostrarAlertaConfirmacionRestauracion(true);
+  };
+  const confirmarRestaurarProveedor = async () => {
+    if (idProveedorARestaurar === null) {
+      console.error("No hay ID de proveedor para restaurar.");
+      setMostrarAlertaConfirmacionRestauracion(false);
+      return;
+    }
 
     try {
-      await axios.patch(`${API_URL}/restore/${id}`);
+      await axios.patch(`${API_URL}/restore/${idProveedorARestaurar}`);
       setMensajeAlertaExito("Proveedor restaurado correctamente.");
       setMostrarAlertaExito(true);
-      obtenerProveedores();
-      obtenerProveedoresEliminados();
+      obtenerProveedores(); // Refresca la lista de proveedores activos
+      obtenerProveedoresEliminados(); // Refresca el historial de proveedores eliminados
     } catch (error) {
       console.error("Error al restaurar el proveedor:", error);
       setMensajeAlertaError("Error al restaurar el proveedor.");
       setMostrarAlertaError(true);
+    } finally {
+      setMostrarAlertaConfirmacionRestauracion(false); // Cierra el modal de confirmación
+      setIdProveedorARestaurar(null); // Limpia el ID
     }
   };
 
@@ -378,7 +388,41 @@ const Proveedor: React.FC = () => {
             className="w-1/2 p-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 transition"
           />
         </div>
-
+{/* Alerta de confirmación de restauración */}
+        {mostrarAlertaConfirmacionRestauracion && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+              <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
+                Confirmación de Restauración
+              </h2>
+              <p className="text-center text-gray-700 mb-6">
+                ¿Estás seguro que querés restaurar este proveedor?
+              </p>
+              <div className="flex justify-around space-x-4">
+                <button
+                  onClick={confirmarRestaurarProveedor}
+                  className="py-2 px-6 bg-green-500 text-white rounded-lg border border-green-500 hover:bg-green-600 focus:ring-1 focus:ring-green-300 transition"
+                >
+                  Aceptar
+                </button>
+                <button
+                  onClick={() => {
+                    setMostrarAlertaConfirmacionRestauracion(false);
+                    setIdProveedorARestaurar(null);
+                  }}
+                  className="py-2 px-6 bg-gray-300 text-gray-800 rounded-lg border border-gray-300 hover:bg-gray-400 focus:ring-1 focus:ring-gray-200 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
         <div className="flex-1 overflow-hidden">
           <div className="max-h-[70vh] overflow-y-auto">
             <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
@@ -504,7 +548,7 @@ const Proveedor: React.FC = () => {
 
       {/* Modal para Historial de Eliminaciones */}
       {mostrarHistorial && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
