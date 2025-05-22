@@ -38,6 +38,7 @@ const Movimiento: React.FC = () => {
   const obtenerMovimientos = async () => {
     try {
       const res = await axios.get(API_URL);
+      console.log("Movimientos obtenidos:", res.data);
       setMovimientos(res.data);
       setTodosLosMovimientos(res.data);
     } catch (error) {
