@@ -17,15 +17,28 @@ const Producto: React.FC = () => {
   const [todosLosProductos, setTodosLosProductos] = useState([]);
   const [filtroNombre, setFiltroNombre] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [marcasDisponibles, setMarcasDisponibles] = useState<{ id: string; nombre: string }[]>([]);
-  const [categoriasDisponibles, setCategoriasDisponibles] = useState<{ id: string; nombre: string }[]>([]);
-  const [proveedoresDisponibles, setProveedoresDisponibles] = useState<{ id: string; nombre: string }[]>([]);
+  const [marcasDisponibles, setMarcasDisponibles] = useState<
+    { id: string; nombre: string }[]
+  >([]);
+  const [categoriasDisponibles, setCategoriasDisponibles] = useState<
+    { id: string; nombre: string }[]
+  >([]);
+  const [proveedoresDisponibles, setProveedoresDisponibles] = useState<
+    { id: string; nombre: string }[]
+  >([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idProductoEditar, setIdProductoEditar] = useState<number | null>(null);
   const [mostrarAlertaExito, setMostrarAlertaExito] = useState(false);
   const [mensajeAlertaExito, setMensajeAlertaExito] = useState("");
   const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
   const [mensajeAlertaError, setMensajeAlertaError] = useState("");
+  const [
+    mostrarAlertaConfirmacionEliminacion,
+    setMostrarAlertaConfirmacionEliminacion,
+  ] = useState(false);
+  const [idProductoAEliminar, setIdProductoAEliminar] = useState<number | null>(
+    null
+  );
 
   // Obtiene todos los productos, marcas, categorías y proveedores desde la API
   const obtenerProductos = async () => {
@@ -63,7 +76,14 @@ const Producto: React.FC = () => {
   // Maneja el envío del formulario para crear o actualizar un producto
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!nombre || !codigo || !descripcion || !marca || !proveedor || !categoria) {
+    if (
+      !nombre ||
+      !codigo ||
+      !descripcion ||
+      !marca ||
+      !proveedor ||
+      !categoria
+    ) {
       setMensajeAlertaError("Todos los campos son obligatorios.");
       setMostrarAlertaError(true);
       return;
@@ -114,21 +134,31 @@ const Producto: React.FC = () => {
 
   // Elimina un producto tras confirmación del usuario
   const handleEliminarProducto = async (id: number) => {
-    const confirmacion = window.confirm("¿Estás seguro que querés eliminar este producto?");
-    if (!confirmacion) return;
+    setIdProductoAEliminar(id);
+    setMostrarAlertaConfirmacionEliminacion(true);
+  };
+  const confirmarEliminarProducto = async () => {
+    if (idProductoAEliminar === null) {
+      console.error("No hay ID de producto para eliminar.");
+      setMostrarAlertaConfirmacionEliminacion(false);
+      return;
+    }
 
     try {
-      await axios.delete(`${API_URL}/softDelete/${id}`);
+      await axios.delete(`${API_URL}/softDelete/${idProductoAEliminar}`);
       setMensajeAlertaExito("Producto eliminado correctamente.");
       setMostrarAlertaExito(true);
-      obtenerProductos();
+      obtenerProductos(); // Refresca la lista de productos activos
+      // Si tienes un historial de eliminados para productos, deberías refrescarlo aquí también.
     } catch (error) {
       console.error("Error al eliminar el producto:", error);
       setMensajeAlertaError("Error al eliminar el producto.");
       setMostrarAlertaError(true);
+    } finally {
+      setMostrarAlertaConfirmacionEliminacion(false); // Cierra el modal de confirmación
+      setIdProductoAEliminar(null); // Limpia el ID
     }
   };
-
   // Prepara el formulario para editar un producto existente
   const handleEditarProducto = (producto: any) => {
     setNombre(producto.nombre);
@@ -190,8 +220,18 @@ const Producto: React.FC = () => {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
           >
-            <svg className="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            <svg
+              className="h-5 w-5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              />
             </svg>
             <div className="flex-1">
               <p className="text-sm font-medium">Éxito</p>
@@ -209,8 +249,18 @@ const Producto: React.FC = () => {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
           >
-            <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="h-5 w-5 text-red-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <div className="flex-1">
               <p className="text-sm font-medium">Error</p>
@@ -220,13 +270,57 @@ const Producto: React.FC = () => {
               onClick={() => setMostrarAlertaError(false)}
               className="text-red-500 hover:text-red-700 focus:outline-none"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </motion.div>
         )}
-
+        {/* Alerta de confirmación de eliminación */}
+        {mostrarAlertaConfirmacionEliminacion && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+              <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
+                Confirmación de Eliminación
+              </h2>
+              <p className="text-center text-gray-700 mb-6">
+                ¿Estás seguro que querés eliminar este producto?
+              </p>
+              <div className="flex justify-around space-x-4">
+                <button
+                  onClick={confirmarEliminarProducto}
+                  className="py-2 px-6 bg-red-500 text-white rounded-lg border border-red-500 hover:bg-red-600 focus:ring-1 focus:ring-red-300 transition"
+                >
+                  Aceptar
+                </button>
+                <button
+                  onClick={() => {
+                    setMostrarAlertaConfirmacionEliminacion(false);
+                    setIdProductoAEliminar(null);
+                  }}
+                  className="py-2 px-6 bg-gray-300 text-gray-800 rounded-lg border border-gray-300 hover:bg-gray-400 focus:ring-1 focus:ring-gray-200 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
         <div className="mb-4">
           <input
             type="text"
@@ -242,25 +336,53 @@ const Producto: React.FC = () => {
             <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
               <thead>
                 <tr className="bg-indigo-100 sticky top-0 z-10">
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Descripción</th>
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Marca</th>
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Categoría</th>
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Proveedor</th>
-                  <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
-                  <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Nombre
+                  </th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Código
+                  </th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Descripción
+                  </th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Marca
+                  </th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Categoría
+                  </th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Proveedor
+                  </th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">
+                    Modificar
+                  </th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">
+                    Eliminar
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {productos.map((producto: any) => (
                   <tr key={producto.id} className="hover:bg-gray-200">
-                    <td className="border px-4 py-2 text-sm">{producto.nombre}</td>
-                    <td className="border px-4 py-2 text-sm">{producto.codigo}</td>
-                    <td className="border px-4 py-2 text-sm">{producto.descripcion}</td>
-                    <td className="border px-4 py-2 text-sm">{producto.marca.nombre}</td>
-                    <td className="border px-4 py-2 text-sm">{producto.categoria.nombre}</td>
-                    <td className="border px-4 py-2 text-sm">{producto.proveedor.nombre}</td>
+                    <td className="border px-4 py-2 text-sm">
+                      {producto.nombre}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">
+                      {producto.codigo}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">
+                      {producto.descripcion}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">
+                      {producto.marca.nombre}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">
+                      {producto.categoria.nombre}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">
+                      {producto.proveedor.nombre}
+                    </td>
                     <td
                       className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
                       onClick={() => handleEditarProducto(producto)}
@@ -298,7 +420,9 @@ const Producto: React.FC = () => {
               type="text"
               placeholder="Nombre"
               value={nombre}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setNombre(e.target.value)
+              }
               className="w-full p-1.5 border border-gray-300 rounded"
               required
             />
@@ -306,7 +430,9 @@ const Producto: React.FC = () => {
               type="text"
               placeholder="Código"
               value={codigo}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setCodigo(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setCodigo(e.target.value)
+              }
               className="w-full p-1.5 border border-gray-300 rounded"
               required
             />
@@ -314,7 +440,9 @@ const Producto: React.FC = () => {
               type="text"
               placeholder="Descripción"
               value={descripcion}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setDescripcion(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setDescripcion(e.target.value)
+              }
               className="w-full p-1.5 border border-gray-300 rounded"
               required
             />

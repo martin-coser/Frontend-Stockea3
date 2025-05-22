@@ -1,6 +1,10 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
-import { PencilSquareIcon, TrashIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import {
+  PencilSquareIcon,
+  TrashIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 // URL base para los endpoints relacionados con proveedores
@@ -16,7 +20,9 @@ const Proveedor: React.FC = () => {
   const [filtroNombre, setFiltroNombre] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
-  const [idProveedorEditar, setIdProveedorEditar] = useState<number | null>(null);
+  const [idProveedorEditar, setIdProveedorEditar] = useState<number | null>(
+    null
+  );
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
   const [proveedoresEliminados, setProveedoresEliminados] = useState([]);
   const [filtroNombreEliminados, setFiltroNombreEliminados] = useState("");
@@ -26,6 +32,13 @@ const Proveedor: React.FC = () => {
   const [mensajeAlertaExito, setMensajeAlertaExito] = useState("");
   const [mostrarAlertaError, setMostrarAlertaError] = useState(false);
   const [mensajeAlertaError, setMensajeAlertaError] = useState("");
+  const [
+    mostrarAlertaConfirmacionEliminacion,
+    setMostrarAlertaConfirmacionEliminacion,
+  ] = useState(false);
+  const [idProveedorAEliminar, setIdProveedorAEliminar] = useState<
+    number | null
+  >(null);
 
   // Obtiene todos los proveedores activos desde la API
   const obtenerProveedores = async () => {
@@ -47,7 +60,9 @@ const Proveedor: React.FC = () => {
       setProveedoresEliminados(res.data);
     } catch (error) {
       console.error("Error al obtener los proveedores eliminados:", error);
-      setMensajeAlertaError("No se pudieron cargar los proveedores eliminados.");
+      setMensajeAlertaError(
+        "No se pudieron cargar los proveedores eliminados."
+      );
       setMostrarAlertaError(true);
     }
   };
@@ -68,8 +83,12 @@ const Proveedor: React.FC = () => {
         .includes(filtroNombreEliminados.toLowerCase());
 
       const fechaEliminacion = new Date(proveedor.deletedAt).getTime();
-      const fechaInicio = filtroFechaInicio ? new Date(filtroFechaInicio).getTime() : null;
-      const fechaFin = filtroFechaFin ? new Date(filtroFechaFin).getTime() : null;
+      const fechaInicio = filtroFechaInicio
+        ? new Date(filtroFechaInicio).getTime()
+        : null;
+      const fechaFin = filtroFechaFin
+        ? new Date(filtroFechaFin).getTime()
+        : null;
 
       const fechaCoincide =
         (!fechaInicio || fechaEliminacion >= fechaInicio) &&
@@ -127,24 +146,37 @@ const Proveedor: React.FC = () => {
 
   // Elimina un proveedor tras confirmación del usuario
   const handleEliminarProveedor = async (id: number) => {
-    const confirmacion = window.confirm("¿Estás seguro que querés eliminar este proveedor?");
-    if (!confirmacion) return;
+    setIdProveedorAEliminar(id);
+    setMostrarAlertaConfirmacionEliminacion(true);
+  };
+
+  const confirmarEliminarProveedor = async () => {
+    if (idProveedorAEliminar === null) {
+      console.error("No hay ID de proveedor para eliminar.");
+      setMostrarAlertaConfirmacionEliminacion(false);
+      return;
+    }
 
     try {
-      await axios.delete(`${API_URL}/softDelete/${id}`);
+      await axios.delete(`${API_URL}/softDelete/${idProveedorAEliminar}`);
       setMensajeAlertaExito("Proveedor eliminado correctamente.");
       setMostrarAlertaExito(true);
-      obtenerProveedores();
+      obtenerProveedores(); // Refresca la lista de proveedores activos
+      obtenerProveedoresEliminados(); // Opcional: refresca el historial si el modal está abierto
     } catch (error) {
       console.error("Error al eliminar el proveedor:", error);
       setMensajeAlertaError("Error al eliminar el proveedor.");
       setMostrarAlertaError(true);
+    } finally {
+      setMostrarAlertaConfirmacionEliminacion(false); // Cierra el modal de confirmación
+      setIdProveedorAEliminar(null); // Limpia el ID
     }
   };
-
   // Restaura un proveedor eliminado
   const handleRestaurarProveedor = async (id: number) => {
-    const confirmacion = window.confirm("¿Estás seguro que querés restaurar este proveedor?");
+    const confirmacion = window.confirm(
+      "¿Estás seguro que querés restaurar este proveedor?"
+    );
     if (!confirmacion) return;
 
     try {
@@ -208,7 +240,9 @@ const Proveedor: React.FC = () => {
       {/* Sección de Listado de Proveedores */}
       <div className="flex-1 p-8 ml-60 relative flex flex-col">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-gray-200 mt-2">Listado de Proveedores</h3>
+          <h3 className="font-bold text-gray-200 mt-2">
+            Listado de Proveedores
+          </h3>
           <div className="space-x-2">
             <button
               onClick={() => setMostrarFormulario(true)}
@@ -234,8 +268,18 @@ const Proveedor: React.FC = () => {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-green-50 border border-green-200 text-green-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
           >
-            <svg className="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            <svg
+              className="h-5 w-5 text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              />
             </svg>
             <div className="flex-1">
               <p className="text-sm font-medium">Éxito</p>
@@ -253,8 +297,18 @@ const Proveedor: React.FC = () => {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="absolute top-3 left-1/3 transform -translate-x-1/2 w-3/5 max-w-sm bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md shadow-sm flex items-center space-x-2 z-50"
           >
-            <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="h-5 w-5 text-red-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <div className="flex-1">
               <p className="text-sm font-medium">Error</p>
@@ -264,13 +318,57 @@ const Proveedor: React.FC = () => {
               onClick={() => setMostrarAlertaError(false)}
               className="text-red-500 hover:text-red-700 focus:outline-none"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </motion.div>
         )}
-
+        {/* Alerta de confirmación de eliminación */}
+        {mostrarAlertaConfirmacionEliminacion && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+              <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
+                Confirmación de Eliminación
+              </h2>
+              <p className="text-center text-gray-700 mb-6">
+                ¿Estás seguro que querés eliminar este proveedor?
+              </p>
+              <div className="flex justify-around space-x-4">
+                <button
+                  onClick={confirmarEliminarProveedor}
+                  className="py-2 px-6 bg-red-500 text-white rounded-lg border border-red-500 hover:bg-red-600 focus:ring-1 focus:ring-red-300 transition"
+                >
+                  Aceptar
+                </button>
+                <button
+                  onClick={() => {
+                    setMostrarAlertaConfirmacionEliminacion(false);
+                    setIdProveedorAEliminar(null);
+                  }}
+                  className="py-2 px-6 bg-gray-300 text-gray-800 rounded-lg border border-gray-300 hover:bg-gray-400 focus:ring-1 focus:ring-gray-200 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
         <div className="mb-4">
           <input
             type="text"
@@ -286,21 +384,41 @@ const Proveedor: React.FC = () => {
             <table className="w-full border-collapse rounded-lg overflow-hidden shadow-md border border-indigo-200 bg-gray-100">
               <thead>
                 <tr className="bg-indigo-100 sticky top-0 z-10">
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">Teléfono</th>
-                  <th className="border px-4 py-2 text-left text-sm font-semibold">CUIT</th>
-                  <th className="border px-4 py-2 text-center text-sm font-semibold">Modificar</th>
-                  <th className="border px-4 py-2 text-center text-sm font-semibold">Eliminar</th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Nombre
+                  </th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Código
+                  </th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    Teléfono
+                  </th>
+                  <th className="border px-4 py-2 text-left text-sm font-semibold">
+                    CUIT
+                  </th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">
+                    Modificar
+                  </th>
+                  <th className="border px-4 py-2 text-center text-sm font-semibold">
+                    Eliminar
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {proveedores.map((proveedor: any) => (
                   <tr key={proveedor.id} className="hover:bg-gray-200">
-                    <td className="border px-4 py-2 text-sm">{proveedor.nombre}</td>
-                    <td className="border px-4 py-2 text-sm">{proveedor.codigo}</td>
-                    <td className="border px-4 py-2 text-sm">{proveedor.telefono}</td>
-                    <td className="border px-4 py-2 text-sm">{proveedor.cuit}</td>
+                    <td className="border px-4 py-2 text-sm">
+                      {proveedor.nombre}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">
+                      {proveedor.codigo}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">
+                      {proveedor.telefono}
+                    </td>
+                    <td className="border px-4 py-2 text-sm">
+                      {proveedor.cuit}
+                    </td>
                     <td
                       className="border px-4 py-2 text-blue-600 text-center cursor-pointer hover:text-gray-700"
                       onClick={() => handleEditarProveedor(proveedor)}
@@ -338,7 +456,9 @@ const Proveedor: React.FC = () => {
               type="text"
               placeholder="Nombre"
               value={nombre}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setNombre(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setNombre(e.target.value)
+              }
               className="w-full p-1.5 border border-gray-300 rounded"
               required
             />
@@ -346,7 +466,9 @@ const Proveedor: React.FC = () => {
               type="text"
               placeholder="Código"
               value={codigo}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setCodigo(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setCodigo(e.target.value)
+              }
               className="w-full p-1.5 border border-gray-300 rounded"
               required
             />
@@ -354,7 +476,9 @@ const Proveedor: React.FC = () => {
               type="number"
               placeholder="Teléfono"
               value={telefono}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setTelefono(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setTelefono(e.target.value)
+              }
               className="w-full p-1.5 border border-gray-300 rounded"
               required
             />
@@ -362,7 +486,9 @@ const Proveedor: React.FC = () => {
               type="number"
               placeholder="CUIT"
               value={cuit}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setCuit(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setCuit(e.target.value)
+              }
               className="w-full p-1.5 border border-gray-300 rounded"
               required
             />
@@ -385,7 +511,9 @@ const Proveedor: React.FC = () => {
             exit={{ opacity: 0, scale: 0.8 }}
             className="bg-white p-6 rounded-lg shadow-lg w-1/2 max-h-[80vh] overflow-y-auto"
           >
-            <h2 className="text-xl font-bold mb-4 text-center">Historial de Eliminaciones</h2>
+            <h2 className="text-xl font-bold mb-4 text-center">
+              Historial de Eliminaciones
+            </h2>
             <div className="mb-4 space-y-2">
               <input
                 type="text"
@@ -419,38 +547,63 @@ const Proveedor: React.FC = () => {
                 </button>
               </div>
             </div>
-            {filtrarProveedoresEliminados(proveedoresEliminados).length === 0 ? (
-              <p className="text-center text-gray-600">No hay proveedores eliminados que coincidan con los filtros.</p>
+            {filtrarProveedoresEliminados(proveedoresEliminados).length ===
+            0 ? (
+              <p className="text-center text-gray-600">
+                No hay proveedores eliminados que coincidan con los filtros.
+              </p>
             ) : (
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border px-4 py-2 text-left text-sm font-semibold">Nombre</th>
-                    <th className="border px-4 py-2 text-left text-sm font-semibold">Código</th>
-                    <th className="border px-4 py-2 text-left text-sm font-semibold">Teléfono</th>
-                    <th className="border px-4 py-2 text-left text-sm font-semibold">CUIT</th>
-                    <th className="border px-4 py-2 text-left text-sm font-semibold">Fecha de Eliminación</th>
-                    <th className="border px-4 py-2 text-center text-sm font-semibold">Restaurar</th>
+                    <th className="border px-4 py-2 text-left text-sm font-semibold">
+                      Nombre
+                    </th>
+                    <th className="border px-4 py-2 text-left text-sm font-semibold">
+                      Código
+                    </th>
+                    <th className="border px-4 py-2 text-left text-sm font-semibold">
+                      Teléfono
+                    </th>
+                    <th className="border px-4 py-2 text-left text-sm font-semibold">
+                      CUIT
+                    </th>
+                    <th className="border px-4 py-2 text-left text-sm font-semibold">
+                      Fecha de Eliminación
+                    </th>
+                    <th className="border px-4 py-2 text-center text-sm font-semibold">
+                      Restaurar
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtrarProveedoresEliminados(proveedoresEliminados).map((proveedor: any) => (
-                    <tr key={proveedor.id} className="hover:bg-gray-50">
-                      <td className="border px-4 py-2 text-sm">{proveedor.nombre}</td>
-                      <td className="border px-4 py-2 text-sm">{proveedor.codigo}</td>
-                      <td className="border px-4 py-2 text-sm">{proveedor.telefono}</td>
-                      <td className="border px-4 py-2 text-sm">{proveedor.cuit}</td>
-                      <td className="border px-4 py-2 text-sm">
-                        {new Date(proveedor.deletedAt).toLocaleString()}
-                      </td>
-                      <td
-                        className="border px-4 py-2 text-green-600 text-center cursor-pointer hover:text-green-700"
-                        onClick={() => handleRestaurarProveedor(proveedor.id)}
-                      >
-                        <ArrowPathIcon className="h-5 w-5 mx-auto" />
-                      </td>
-                    </tr>
-                  ))}
+                  {filtrarProveedoresEliminados(proveedoresEliminados).map(
+                    (proveedor: any) => (
+                      <tr key={proveedor.id} className="hover:bg-gray-50">
+                        <td className="border px-4 py-2 text-sm">
+                          {proveedor.nombre}
+                        </td>
+                        <td className="border px-4 py-2 text-sm">
+                          {proveedor.codigo}
+                        </td>
+                        <td className="border px-4 py-2 text-sm">
+                          {proveedor.telefono}
+                        </td>
+                        <td className="border px-4 py-2 text-sm">
+                          {proveedor.cuit}
+                        </td>
+                        <td className="border px-4 py-2 text-sm">
+                          {new Date(proveedor.deletedAt).toLocaleString()}
+                        </td>
+                        <td
+                          className="border px-4 py-2 text-green-600 text-center cursor-pointer hover:text-green-700"
+                          onClick={() => handleRestaurarProveedor(proveedor.id)}
+                        >
+                          <ArrowPathIcon className="h-5 w-5 mx-auto" />
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             )}
