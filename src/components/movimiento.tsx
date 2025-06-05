@@ -137,7 +137,7 @@ const Movimiento: React.FC = () => {
       setMostrarAlertaIngreso(true);
       return;
     }
-
+  
     for (const id of productosSeleccionados) {
       if (!cantidades[id] || parseInt(cantidades[id]) <= 0) {
         setMensajeAlertaIngreso("Debe especificar una cantidad válida para cada producto seleccionado.");
@@ -145,7 +145,7 @@ const Movimiento: React.FC = () => {
         return;
       }
     }
-
+  
     try {
       const totalCantidades = productosSeleccionados.reduce(
         (sum, id) => sum + parseInt(cantidades[id]),
@@ -156,14 +156,14 @@ const Movimiento: React.FC = () => {
         setMostrarAlertaIngreso(true);
         return;
       }
-
+  
       const costoTotal = parseFloat(costo);
       if (isNaN(costoTotal) || costoTotal <= 0) {
         setMensajeAlertaIngreso("El costo debe ser un número válido mayor que cero.");
         setMostrarAlertaIngreso(true);
         return;
       }
-
+  
       for (const id of productosSeleccionados) {
         const cantidad = parseInt(cantidades[id]);
         const costoProporcional = (cantidad / totalCantidades) * costoTotal;
@@ -187,6 +187,7 @@ const Movimiento: React.FC = () => {
       setMensajeAlertaIngreso("");
       setMostrarModalIngreso(false);
       obtenerMovimientos();
+      obtenerProductos(); // Actualiza los productos para reflejar el nuevo stock
     } catch (error) {
       console.error("Error al registrar los movimientos de ingreso:", error);
       setMensajeAlertaIngreso("Error al registrar los movimientos de ingreso.");
@@ -202,7 +203,7 @@ const Movimiento: React.FC = () => {
       setMostrarAlertaEgreso(true);
       return;
     }
-
+  
     for (const id of productosSeleccionados) {
       if (!cantidades[id] || parseInt(cantidades[id]) <= 0) {
         setMensajeAlertaEgreso("Debe especificar una cantidad válida para cada producto seleccionado.");
@@ -210,7 +211,7 @@ const Movimiento: React.FC = () => {
         return;
       }
     }
-
+  
     try {
       const totalCantidades = productosSeleccionados.reduce(
         (sum, id) => sum + parseInt(cantidades[id]),
@@ -221,7 +222,7 @@ const Movimiento: React.FC = () => {
         setMostrarAlertaEgreso(true);
         return;
       }
-
+  
       for (const id of productosSeleccionados) {
         const cantidad = parseInt(cantidades[id]);
         const movimiento = {
@@ -243,6 +244,7 @@ const Movimiento: React.FC = () => {
       setMensajeAlertaEgreso("");
       setMostrarModalEgreso(false);
       obtenerMovimientos();
+      obtenerProductos(); // Actualiza los productos para reflejar el nuevo stock
     } catch (error: any) {
       console.error("Error al registrar los movimientos de egreso:", error);
       if (error.response && error.response.status === 400) {
@@ -717,7 +719,7 @@ const Movimiento: React.FC = () => {
                           <td className="border px-4 py-2 text-sm">{producto.codigo}</td>
                           <td className="border px-4 py-2 text-sm">{producto.categoria.nombre}</td>
                           <td className="border px-4 py-2 text-sm">{producto.proveedor.nombre}</td>
-                          <td className="border px-4 py-2 text-sm">{producto.stock || 0}</td>
+                          <td className="border px-4 py-2 text-sm">{producto.stock || "No Disponible"}</td>
                           <td className="border px-4 py-2 text-sm">
                             <input
                               type="number"
