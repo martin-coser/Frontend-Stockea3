@@ -8,7 +8,9 @@ import {
 import { motion } from "framer-motion";
 
 // URL base para los endpoints relacionados con proveedores
-const API_URL = "http://localhost:4000/proveedor";
+const API_URL = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/proveedor`
+  : 'http://localhost:4000/proveedor';
 
 const Proveedor: React.FC = () => {
   const [nombre, setNombre] = useState("");

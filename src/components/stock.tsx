@@ -3,7 +3,9 @@ import axios from "axios";
 import { motion } from "framer-motion";
 
 // URL base para los endpoints relacionados con productos
-const API_URL = "http://localhost:4000/producto";
+const API_URL = process.env.REACT_APP_API_URL 
+  ? `${process.env.REACT_APP_API_URL}`
+  : 'http://localhost:4000';
 
 const Stock: React.FC = () => {
   const [productos, setProductos] = useState([]);
@@ -20,7 +22,7 @@ const Stock: React.FC = () => {
   // Obtiene todos los productos
   const obtenerProductos = async () => {
     try {
-      const res = await axios.get(API_URL);
+      const res = await axios.get(`${API_URL}/producto`);
       const productosConStock = res.data.filter((producto: any) => producto.stock > 0);
       // Filtrar productos que NO están eliminados (sin deletedAt)
       const productosFiltrados = productosConStock.filter(
@@ -28,9 +30,9 @@ const Stock: React.FC = () => {
       );
       setProductos(productosFiltrados);
       setTodosLosProductos(productosFiltrados);
-      const mar = await axios.get("http://localhost:4000/marca");
-      const cat = await axios.get("http://localhost:4000/categoria");
-      const pro = await axios.get("http://localhost:4000/proveedor");
+      const mar = await axios.get(`${API_URL}/marca`);
+      const cat = await axios.get(`${API_URL}/categoria`);
+      const pro = await axios.get(`${API_URL}/proveedor`);
 
       setMarcasDisponibles(mar.data);
       setCategoriasDisponibles(cat.data);

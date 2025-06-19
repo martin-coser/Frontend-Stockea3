@@ -3,8 +3,13 @@ import axios from "axios";
 import { EyeIcon, XMarkIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
-const API_URL = "http://localhost:4000/movimiento";
-const PRODUCTOS_API_URL = "http://localhost:4000/producto";
+const API_URL = process.env.REACT_APP_API_URL 
+  ? `${process.env.REACT_APP_API_URL}/movimiento`
+  : 'http://localhost:4000/movimiento';
+
+const PRODUCTOS_API_URL = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/producto`
+  : 'http://localhost:4000/producto';
 
 const Movimiento: React.FC = () => {
   const [nombre, setNombre] = useState("");

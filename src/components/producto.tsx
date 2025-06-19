@@ -4,7 +4,9 @@ import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 // URL base para los endpoints relacionados con productos
-const API_URL = "http://localhost:4000/producto";
+const API_URL = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}`
+  : 'http://localhost:4000';
 
 const Producto: React.FC = () => {
   const [nombre, setNombre] = useState("");
@@ -35,7 +37,7 @@ const Producto: React.FC = () => {
   // Obtiene todos los productos, marcas, categorías y proveedores desde la API
   const obtenerProductos = async () => {
     try {
-      const res = await axios.get(API_URL);
+      const res = await axios.get(`${API_URL}/producto`);
       // Filtrar productos que NO están eliminados (sin deletedAt)
       const productosFiltrados = res.data.filter(
         (producto: any) => !producto.deletedAt
@@ -43,9 +45,9 @@ const Producto: React.FC = () => {
       setProductos(productosFiltrados);
       setTodosLosProductos(productosFiltrados);
 
-      const mar = await axios.get("http://localhost:4000/marca");
-      const cat = await axios.get("http://localhost:4000/categoria");
-      const pro = await axios.get("http://localhost:4000/proveedor");
+      const mar = await axios.get(`${API_URL}/marca`);
+      const cat = await axios.get(`${API_URL}/categoria`);
+      const pro = await axios.get(`${API_URL}/proveedor`);
 
       setMarcasDisponibles(mar.data);
       setCategoriasDisponibles(cat.data);

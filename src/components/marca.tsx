@@ -8,7 +8,9 @@ import {
 import { motion } from "framer-motion";
 
 // URL base para los endpoints relacionados con marcas
-const API_URL = "http://localhost:4000/marca";
+const API_URL = process.env.REACT_APP_API_URL 
+  ? `${process.env.REACT_APP_API_URL}/marca`
+  : 'http://localhost:4000/marca';
 
 const Marca: React.FC = () => {
   const [nombre, setNombre] = useState("");

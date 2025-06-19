@@ -8,7 +8,9 @@ import {
 import { motion } from "framer-motion";
 
 // URL base para los endpoints relacionados con categorías
-const API_URL = "http://localhost:4000/categoria";
+const API_URL = process.env.REACT_APP_API_URL 
+  ? `${process.env.REACT_APP_API_URL}/categoria`
+  : 'http://localhost:4000/categoria';
 
 const Categoria: React.FC = () => {
   const [nombre, setNombre] = useState("");
