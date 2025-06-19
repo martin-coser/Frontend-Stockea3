@@ -115,7 +115,7 @@ const Producto: React.FC = () => {
         setMensajeAlertaExito("Producto actualizado con éxito.");
         setMostrarAlertaExito(true);
       } else {
-        await axios.post(API_URL, {
+        await axios.post(`${API_URL}/producto`, {
           nombre,
           codigo,
           descripcion,
